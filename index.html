@@ -1501,23 +1501,6 @@
     });
 
     /* ========================================================
-       15. BULUTLI REAL-TIME SINXRONIZATSIYA (CLOUD SYNC)
-       ======================================================== */
-    const DEFAULT_SYNC_KEY = 'bbedadc';
-    let syncKey = localStorage.getItem('rejapro_sync_key') || DEFAULT_SYNC_KEY;
-    let isSyncing = false;
-    let syncTimeout = null;
-
-    function countTotalTasks(obj) {
-      if (!obj || !obj.daily) return 0;
-      let count = 0;
-      Object.values(obj.daily).forEach(list => {
-        if (Array.isArray(list)) count += list.length;
-      });
-      return count;
-    }
-
-    /* ========================================================
        15. DIRECT DATA TRANSFER & CLOUD SYNCHRONIZATION
        ======================================================== */
     const CLOUD_API_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a16ee545f27f9e';
@@ -1691,6 +1674,43 @@
       } catch (e) {}
     }
 
+    function countTotalTasks(obj) {
+      if (!obj || !obj.daily) return 0;
+      let count = 0;
+      Object.values(obj.daily).forEach(list => {
+        if (Array.isArray(list)) count += list.length;
+      });
+      return count;
+    }
+
+    async function initialSmartSync() {
+      const localCount = countTotalTasks(state);
+      try {
+        setSyncIndicator('loading');
+        const res = await fetch(`${CLOUD_API_URL}?t=${Date.now()}`);
+        if (res.ok) {
+          const resp = await res.json();
+          const cloudState = resp?.data;
+          const cloudCount = countTotalTasks(cloudState);
+
+          if (localCount > cloudCount) {
+            // Kompyuterda ko'proq vazifalar bor -> Bulutga yuklaymiz!
+            await pushToCloud();
+          } else if (cloudCount > 0 && cloudCount >= localCount) {
+            // Bulutda ko'proq ma'lumot bor -> Bulutdan yuklaymiz!
+            state = { ...defaultState, ...cloudState };
+            saveLocalOnly();
+            renderCurrentTab();
+            setSyncIndicator('success');
+          } else {
+            setSyncIndicator('idle');
+          }
+        }
+      } catch (e) {
+        setSyncIndicator('idle');
+      }
+    }
+
     // Telefon ekrani ochilganda bulutdan yangilash
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -1704,7 +1724,7 @@
     migrateOldData();
     const imported = checkUrlHashImport();
     if (!imported) {
-      pullFromCloud();
+      initialSmartSync();
     }
     switchTab('daily');
   </script>
