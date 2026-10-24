@@ -63,6 +63,9 @@
       
       <!-- O'ng tomondagi tugmalar -->
       <div class="flex items-center gap-1.5">
+        <button onclick="openSearchModal()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Tezkor Qidiruv (Ctrl+K)">
+          <span>🔍</span>
+        </button>
         <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
           <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="hidden sm:inline">Sinxron</span>
@@ -97,6 +100,9 @@
       <button onclick="switchTab('habits')" id="tabBtn-habits" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
         <span>⚡</span> Odatlar
       </button>
+      <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>📌</span> Eslatmalar
+      </button>
       <button onclick="switchTab('finance')" id="tabBtn-finance" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
         <span>💰</span> Moliya
       </button>
@@ -127,13 +133,39 @@
           <p id="dailyDateSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium"></p>
           <input type="date" id="datePickerInput" onchange="onDatePicked(this.value)" class="absolute opacity-0 pointer-events-none inset-0">
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           <button onclick="goToday()" class="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
             Bugun
+          </button>
+          <button onclick="toggleCalendarView()" id="calToggleBtn" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1 transition" title="Oylik Kalendarni ochish">
+            <span>📅</span> <span class="hidden sm:inline">Kalendar</span>
           </button>
           <button onclick="changeDailyDate(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi kun">
             ▶
           </button>
+        </div>
+      </div>
+
+      <!-- Interaktiv Oylik Mini-Kalendar (Heatmap Grid) -->
+      <div id="calendarPanel" class="hidden bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-slate-200 dark:border-slate-700 transition-all duration-300">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-700">
+          <button onclick="changeCalMonth(-1)" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition">◀</button>
+          <div class="text-xs font-bold text-slate-800 dark:text-white" id="calMonthYearTitle">Oktyabr 2026</div>
+          <div class="flex items-center gap-1">
+            <button onclick="goCalToday()" class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">Joriy oy</button>
+            <button onclick="changeCalMonth(1)" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition">▶</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1">
+          <span>Du</span><span>Se</span><span>Ch</span><span>Pa</span><span>Ju</span><span class="text-emerald-500">Sh</span><span class="text-red-400">Ya</span>
+        </div>
+        <div id="calGridDays" class="grid grid-cols-7 gap-1 text-center text-xs">
+          <!-- JS orqali to'ldiriladi -->
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Bajarilgan</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Jarayonda</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-emerald-500 inline-block"></span> Tanlangan kun</span>
         </div>
       </div>
 
@@ -168,6 +200,14 @@
             title="Ovoz bilan kiritish (Gapiring)"
           >
             🎙️
+          </button>
+          <button 
+            type="button"
+            onclick="openModal('templatesModal')"
+            class="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 font-bold px-3 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shrink-0"
+            title="Tezkor tayyor shablonlar"
+          >
+            ⚡ <span class="hidden sm:inline">Shablon</span>
           </button>
           <button 
             type="submit" 
@@ -348,6 +388,52 @@
       <div id="habitsList" class="space-y-2.5 flex-1 min-h-[160px]"></div>
     </section>
 
+    <!-- ==================== 5.5 RANGLI ESLATMALAR (STICKY NOTES) ==================== -->
+    <section id="view-notes" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 text-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><span>📌</span> Eslatmalar & Stikerlar Doskasi</h2>
+          <p class="text-xs text-amber-100 mt-0.5">Tezkor fikrlar, eslatmalar, parollar yoki g'oyalar stikeri</p>
+        </div>
+        <span id="notesCountBadge" class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">0 ta</span>
+      </div>
+
+      <!-- Yangi Eslatma qo'shish formasi -->
+      <form onsubmit="handleNoteSubmit(event)" class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5">
+        <textarea 
+          id="noteInput" 
+          rows="2" 
+          placeholder="Yangi tezkor eslatma, fikr yoki g'oyani yozing..." 
+          class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-800 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-amber-500 transition resize-none"
+        ></textarea>
+        
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+          <!-- Rang tanlash -->
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-slate-400 mr-0.5">Stiker rangi:</span>
+            <button type="button" onclick="selectNoteColor('yellow')" id="colorBtn-yellow" class="note-color-btn w-6 h-6 rounded-full bg-amber-300 ring-2 ring-amber-500 scale-110 transition shadow-xs" title="Sariq"></button>
+            <button type="button" onclick="selectNoteColor('green')" id="colorBtn-green" class="note-color-btn w-6 h-6 rounded-full bg-emerald-300 hover:scale-105 transition shadow-xs" title="Yashil"></button>
+            <button type="button" onclick="selectNoteColor('blue')" id="colorBtn-blue" class="note-color-btn w-6 h-6 rounded-full bg-sky-300 hover:scale-105 transition shadow-xs" title="Moviy"></button>
+            <button type="button" onclick="selectNoteColor('pink')" id="colorBtn-pink" class="note-color-btn w-6 h-6 rounded-full bg-pink-300 hover:scale-105 transition shadow-xs" title="Pushti"></button>
+          </div>
+
+          <button type="submit" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5">
+            <span>+</span> Eslatma qo'shish
+          </button>
+        </div>
+      </form>
+
+      <!-- Eslatmalar kartalari ro'yxati -->
+      <div id="notesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+        <!-- JS render qiladi -->
+      </div>
+      <div id="notesEmpty" class="hidden text-center py-12 text-slate-400">
+        <div class="text-4xl mb-2">📌</div>
+        <p class="font-medium text-sm">Hali hech qanday eslatma qo'shilmagan</p>
+        <p class="text-xs mt-1">Muhim eslatma yoki fikrlaringizni shu yerga yozib qo'ying</p>
+      </div>
+    </section>
+
     <!-- ==================== 6. MOLIYA & XARAJATLAR BO'LIMI ==================== -->
     <section id="view-finance" class="tab-view hidden flex-1 flex flex-col space-y-4">
       <div class="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-2xl p-4 shadow-sm">
@@ -513,32 +599,36 @@
   </main>
 
   <!-- Pastki Mobil Tezkor Navigation Bar -->
-  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 py-1.5 px-3 z-30 no-print sm:hidden flex justify-around text-[10px] font-semibold text-slate-500">
-    <button onclick="switchTab('daily')" class="flex flex-col items-center gap-0.5 py-1 px-2 text-emerald-600">
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 py-1.5 px-2 z-30 no-print sm:hidden flex justify-around text-[9px] font-semibold text-slate-500 overflow-x-auto no-scrollbar">
+    <button onclick="switchTab('daily')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 text-emerald-600 shrink-0">
       <span class="text-base">📅</span>
       <span>Kunlik</span>
     </button>
-    <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">📆</span>
       <span>Haftalik</span>
     </button>
-    <button onclick="switchTab('monthly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('monthly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">🗓️</span>
       <span>Oylik</span>
     </button>
-    <button onclick="switchTab('yearly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('yearly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">🎯</span>
       <span>Yillik</span>
     </button>
-    <button onclick="switchTab('habits')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('habits')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">⚡</span>
       <span>Odatlar</span>
     </button>
-    <button onclick="switchTab('finance')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('notes')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
+      <span class="text-base">📌</span>
+      <span>Eslatma</span>
+    </button>
+    <button onclick="switchTab('finance')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">💰</span>
       <span>Moliya</span>
     </button>
-    <button onclick="switchTab('pomodoro')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+    <button onclick="switchTab('pomodoro')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
       <span class="text-base">⏱️</span>
       <span>Fokus</span>
     </button>
@@ -668,6 +758,109 @@
     </div>
   </div>
 
+  <!-- Tezkor Shablonlar Modali -->
+  <div id="templatesModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 max-w-md w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <span>⚡</span> Tezkor Kunlik Shablonlar
+        </h3>
+        <button onclick="closeModal('templatesModal')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Bir tugma orqali kuningizni tayyor samarali reja bilan to'ldiring:
+      </p>
+
+      <div class="space-y-2.5">
+        <!-- Shablon 1: Ertalabki tartib -->
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+              <span>🌅</span> Ertalabki tartib (Morning)
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Badantarbiya (07:00), Nonushta (07:30), Kunlik reja (08:00)</p>
+          </div>
+          <button onclick="applyRoutineTemplate('morning')" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-xl shrink-0 transition">
+            Qo'llash
+          </button>
+        </div>
+
+        <!-- Shablon 2: Samarali Ish kuni -->
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+              <span>💼</span> Samarali Ish kuni (Deep Work)
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Pochta & xabarlar (09:00), Katta vazifa (10:00), Hisobot (17:30)</p>
+          </div>
+          <button onclick="applyRoutineTemplate('work')" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-xl shrink-0 transition">
+            Qo'llash
+          </button>
+        </div>
+
+        <!-- Shablon 3: O'qish va Ilm -->
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+              <span>📚</span> O'qish & Shaxsiy Rivojlanish
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Amaliyot & kod (19:00), 20 bet kitob (20:30), Til & lug'at (21:30)</p>
+          </div>
+          <button onclick="applyRoutineTemplate('study')" class="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-xl shrink-0 transition">
+            Qo'llash
+          </button>
+        </div>
+
+        <!-- Shablon 4: Dam olish kuni -->
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+              <span>🏖️</span> Dam olish & Hordiq (Weekend)
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Uy tartibi (10:00), Oila bilan sayr (14:00), Haftalik tahlil (20:00)</p>
+          </div>
+          <button onclick="applyRoutineTemplate('weekend')" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-xl shrink-0 transition">
+            Qo'llash
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tezkor Qidiruv Modali -->
+  <div id="searchModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-start justify-center p-4 pt-16 sm:pt-20">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 max-w-lg w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-3 max-h-[80vh] flex flex-col">
+      <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-3">
+        <span class="text-base text-slate-400">🔍</span>
+        <input 
+          type="text" 
+          id="globalSearchInput" 
+          oninput="handleGlobalSearch(this.value)"
+          placeholder="Vazifalar, eslatmalar, maqsadlardan qidirish..." 
+          class="flex-1 bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+        />
+        <button onclick="closeModal('searchModal')" class="text-slate-400 hover:text-slate-600 text-base p-1">✕</button>
+      </div>
+      
+      <!-- Qidiruv Natijalari Konteyneri -->
+      <div id="searchResultsList" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[140px] text-xs">
+        <p class="text-center text-slate-400 py-8">Qidirish uchun so'z yozing (masalan: "kitob", "ish", "sport")...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bekor qilish (Undo) Toast bildirishnomasi -->
+  <div id="undoToast" class="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-slate-700/60 z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-4">
+    <div class="flex items-center gap-2 text-xs font-semibold">
+      <span class="text-amber-400">🗑️</span>
+      <span id="undoToastText">Vazifa o'chirildi</span>
+    </div>
+    <button onclick="executeUndo()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs px-3 py-1 rounded-xl shadow-xs transition flex items-center gap-1">
+      <span>↩️</span> Qaytarish
+    </button>
+    <button onclick="hideUndoToast()" class="text-slate-400 hover:text-white text-xs pl-1">✕</button>
+  </div>
+
   <!-- JAVASCRIPT LOGIKA -->
   <script>
     /* ========================================================
@@ -688,6 +881,10 @@
         { id: 3, title: '2 litr suv ichish', icon: '💧', completedDates: {} },
         { id: 4, title: 'Dasturlash yoki yangi bilim', icon: '💻', completedDates: {} }
       ],
+      notes: [
+        { id: 1, text: "Xotirjamlik va reja — muvaffaqiyat garovi! Muhim ishlarni ertalabga qo'ying.", color: "yellow", date: "Bugun", pinned: true },
+        { id: 2, text: "Kun davomida kamida 20 bet kitob o'qish va yangi bilim o'rganish.", color: "green", date: "Bugun", pinned: false }
+      ],
       finance: {},  // { '2026-10-24': [ {id, type, amount, desc, category} ] }
       journal: {},  // { '2026-10-24': { wins, lessons, tomorrow } }
       settings: { theme: 'auto' }
@@ -698,7 +895,11 @@
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return { ...defaultState, ...JSON.parse(raw) };
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (!parsed.notes) parsed.notes = defaultState.notes;
+          return { ...defaultState, ...parsed };
+        }
       } catch (e) {}
       // Dastlabki demo ma'lumotlar bilan to'ldirish
       const today = getTodayString();
@@ -794,6 +995,7 @@
       if (state.activeTab === 'monthly') renderMonthly();
       if (state.activeTab === 'yearly') renderYearly();
       if (state.activeTab === 'habits') renderHabits();
+      if (state.activeTab === 'notes') renderNotes();
       if (state.activeTab === 'finance') renderFinance();
       if (state.activeTab === 'journal') renderJournal();
       if (state.activeTab === 'stats') renderStats();
@@ -999,11 +1201,66 @@
       checkAllDoneConfetti();
     }
 
+    let lastDeletedTask = null;
+    let undoToastTimer = null;
+
     function deleteDailyTodo(id) {
       if (!state.daily[state.selectedDate]) return;
-      state.daily[state.selectedDate] = state.daily[state.selectedDate].filter(t => t.id !== id);
+      const list = state.daily[state.selectedDate];
+      const idx = list.findIndex(t => t.id === id);
+      if (idx === -1) return;
+
+      const item = list[idx];
+      lastDeletedTask = {
+        task: { ...item },
+        date: state.selectedDate,
+        index: idx
+      };
+
+      state.daily[state.selectedDate] = list.filter(t => t.id !== id);
       saveState();
       renderDaily();
+      showUndoToast(`"${item.text.slice(0, 20)}${item.text.length > 20 ? '...' : ''}" o'chirildi`);
+    }
+
+    function showUndoToast(msg) {
+      const toast = document.getElementById('undoToast');
+      const textEl = document.getElementById('undoToastText');
+      if (!toast || !textEl) return;
+      textEl.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(undoToastTimer);
+      undoToastTimer = setTimeout(() => {
+        hideUndoToast();
+      }, 5000);
+    }
+
+    function hideUndoToast() {
+      const toast = document.getElementById('undoToast');
+      if (!toast) return;
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+    }
+
+    function executeUndo() {
+      if (!lastDeletedTask) return;
+      const { task, date, index } = lastDeletedTask;
+      if (!state.daily[date]) state.daily[date] = [];
+
+      if (index >= 0 && index <= state.daily[date].length) {
+        state.daily[date].splice(index, 0, task);
+      } else {
+        state.daily[date].push(task);
+      }
+
+      lastDeletedTask = null;
+      hideUndoToast();
+      saveState();
+      renderDaily();
+      showSyncToast("✅ Vazifa qaytarildi!");
+      if (navigator.vibrate) navigator.vibrate(25);
     }
 
     function clearCompletedDaily() {
@@ -1035,6 +1292,11 @@
 
       document.getElementById('dailyProgressText').textContent = `${completedCount}/${total} (${percent}%)`;
       document.getElementById('dailyProgressBar').style.width = `${percent}%`;
+
+      const calPanel = document.getElementById('calendarPanel');
+      if (calPanel && !calPanel.classList.contains('hidden')) {
+        renderCalendar();
+      }
 
       let filtered = list;
       if (currentDailyFilter === 'active') filtered = list.filter(t => !t.completed);
@@ -1106,6 +1368,163 @@
           `;
         }).join('');
       }
+    }
+
+    /* ========================================================
+       4.1 OYLIK MINI-KALENDAR VA TASHKILIY HEATMAP
+       ======================================================== */
+    let calDisplayDate = new Date();
+
+    function toggleCalendarView() {
+      const panel = document.getElementById('calendarPanel');
+      if (!panel) return;
+      const isHidden = panel.classList.toggle('hidden');
+      if (!isHidden) {
+        const parts = state.selectedDate.split('-').map(Number);
+        calDisplayDate = new Date(parts[0], parts[1] - 1, 1);
+        renderCalendar();
+      }
+    }
+
+    function changeCalMonth(offset) {
+      calDisplayDate.setMonth(calDisplayDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    function goCalToday() {
+      calDisplayDate = new Date();
+      renderCalendar();
+    }
+
+    function pickCalendarDate(dateStr) {
+      state.selectedDate = dateStr;
+      saveState();
+      renderDaily();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calGridDays');
+      const title = document.getElementById('calMonthYearTitle');
+      if (!grid || !title) return;
+
+      const year = calDisplayDate.getFullYear();
+      const month = calDisplayDate.getMonth();
+
+      const monthNames = [
+        "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+        "Iyul", "Avgust", "Sentabr", "Oktyabr", "Noyabr", "Dekabr"
+      ];
+      title.textContent = `${monthNames[month]} ${year}`;
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      let startDay = firstDayOfMonth.getDay() - 1; // Du=0 ... Ya=6
+      if (startDay === -1) startDay = 6;
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayStr = getTodayString();
+
+      let html = '';
+
+      for (let i = 0; i < startDay; i++) {
+        html += '<div class="h-8"></div>';
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isSelected = dateStr === state.selectedDate;
+        const isToday = dateStr === todayStr;
+
+        const tasks = (state.daily && state.daily[dateStr]) || [];
+        const total = tasks.length;
+        const done = tasks.filter(t => t.completed).length;
+
+        let badgeClass = 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700';
+
+        if (isSelected) {
+          badgeClass = 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-400/50 shadow-xs';
+        } else if (isToday) {
+          badgeClass = 'font-bold border border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30';
+        }
+
+        let indicatorHtml = '';
+        if (total > 0) {
+          if (done === total) {
+            indicatorHtml = `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'} absolute bottom-1 left-1/2 -translate-x-1/2"></span>`;
+          } else if (done > 0) {
+            indicatorHtml = `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-amber-200' : 'bg-amber-500'} absolute bottom-1 left-1/2 -translate-x-1/2"></span>`;
+          } else {
+            indicatorHtml = `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-slate-200' : 'bg-slate-400'} absolute bottom-1 left-1/2 -translate-x-1/2"></span>`;
+          }
+        }
+
+        html += `
+          <button 
+            type="button"
+            onclick="pickCalendarDate('${dateStr}')" 
+            class="h-8 rounded-xl flex items-center justify-center relative cursor-pointer text-xs transition active:scale-95 ${badgeClass}"
+            title="${dateStr}: ${done}/${total} vazifa"
+          >
+            <span>${d}</span>
+            ${indicatorHtml}
+          </button>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    /* ========================================================
+       4.2 TEZKOR SHABLONLAR (QUICK ROUTINE TEMPLATES)
+       ======================================================== */
+    function applyRoutineTemplate(type) {
+      const templates = {
+        morning: [
+          { text: "Ertalabki badantarbiya va mashq", priority: "medium", category: "health", time: "07:00" },
+          { text: "Sog'lom va quvvatga boy nonushta", priority: "low", category: "health", time: "07:30" },
+          { text: "Kunlik reja va eng muhim maqsadni belgilash", priority: "high", category: "work", time: "08:00" }
+        ],
+        work: [
+          { text: "Pochta va muhim xabarlarni saralash", priority: "medium", category: "work", time: "09:00" },
+          { text: "Kunning asosiy va eng qiyin vazifasini bajarish", priority: "high", category: "work", time: "10:00" },
+          { text: "Jamoa / mijozlar bilan uchrashuv va aloqa", priority: "medium", category: "work", time: "14:00" },
+          { text: "Kunlik hisobot va ertangi kunni rejalashtirish", priority: "high", category: "work", time: "17:30" }
+        ],
+        study: [
+          { text: "Dasturlash yoki yangi bilim ustida 1 soat amaliyot", priority: "high", category: "study", time: "19:00" },
+          { text: "20 bet kitob mutolaa qilish", priority: "medium", category: "study", time: "20:30" },
+          { text: "Xorijiy til va yangi lug'at takrorlash", priority: "medium", category: "study", time: "21:30" }
+        ],
+        weekend: [
+          { text: "Uy va ish stolini saranjomlash, tartib", priority: "low", category: "personal", time: "10:00" },
+          { text: "Oila va yaqinlar bilan vaqt o'tkazish, sayr", priority: "high", category: "personal", time: "14:00" },
+          { text: "Haftalik xulosa va yangi haftani rejalashtirish", priority: "medium", category: "personal", time: "20:00" }
+        ]
+      };
+
+      const selected = templates[type];
+      if (!selected) return;
+
+      if (!state.daily[state.selectedDate]) {
+        state.daily[state.selectedDate] = [];
+      }
+
+      selected.forEach((item, idx) => {
+        state.daily[state.selectedDate].push({
+          id: Date.now() + idx,
+          text: item.text,
+          completed: false,
+          priority: item.priority,
+          category: item.category,
+          time: item.time
+        });
+      });
+
+      saveState();
+      renderDaily();
+      closeModal('templatesModal');
+      showSyncToast("✨ Shablon vazifalari kiritildi!");
+      if (navigator.vibrate) navigator.vibrate(30);
     }
 
     /* ========================================================
@@ -1422,6 +1841,289 @@
         `;
       }).join('');
     }
+
+    /* ========================================================
+       8.5 RANGLI ESLATMALAR & STIKERLAR (STICKY NOTES)
+       ======================================================== */
+    let selectedNoteColor = 'yellow';
+
+    function selectNoteColor(color) {
+      selectedNoteColor = color;
+      document.querySelectorAll('.note-color-btn').forEach(b => {
+        b.classList.remove('ring-2', 'ring-amber-500', 'scale-110');
+      });
+      const activeBtn = document.getElementById(`colorBtn-${color}`);
+      if (activeBtn) {
+        activeBtn.classList.add('ring-2', 'ring-amber-500', 'scale-110');
+      }
+    }
+
+    function handleNoteSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('noteInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!state.notes) state.notes = [];
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}, ${now.getDate()}-${String(now.getMonth()+1).padStart(2, '0')}`;
+
+      state.notes.unshift({
+        id: Date.now(),
+        text,
+        color: selectedNoteColor,
+        date: timeStr,
+        pinned: false
+      });
+
+      input.value = '';
+      saveState();
+      renderNotes();
+      if (navigator.vibrate) navigator.vibrate(25);
+      showSyncToast("📌 Eslatma saqlandi!");
+    }
+
+    function deleteNote(id) {
+      if (!state.notes) return;
+      state.notes = state.notes.filter(n => n.id !== id);
+      saveState();
+      renderNotes();
+    }
+
+    function togglePinNote(id) {
+      if (!state.notes) return;
+      const note = state.notes.find(n => n.id === id);
+      if (note) {
+        note.pinned = !note.pinned;
+        saveState();
+        renderNotes();
+      }
+    }
+
+    function copyNoteText(id) {
+      if (!state.notes) return;
+      const note = state.notes.find(n => n.id === id);
+      if (note) {
+        navigator.clipboard.writeText(note.text).then(() => {
+          showSyncToast("📋 Nusxalandi!");
+        });
+      }
+    }
+
+    function renderNotes() {
+      const notes = state.notes || [];
+      const listEl = document.getElementById('notesList');
+      const emptyEl = document.getElementById('notesEmpty');
+      const countBadge = document.getElementById('notesCountBadge');
+
+      if (countBadge) countBadge.textContent = `${notes.length} ta`;
+      if (!listEl) return;
+
+      if (notes.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      const sorted = [...notes].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+      const colorStyles = {
+        yellow: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-950 dark:text-amber-100',
+        green: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60 text-emerald-950 dark:text-emerald-100',
+        blue: 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800/60 text-sky-950 dark:text-sky-100',
+        pink: 'bg-pink-50 dark:bg-pink-950/40 border-pink-200 dark:border-pink-800/60 text-pink-950 dark:text-pink-100'
+      };
+
+      listEl.innerHTML = sorted.map(note => {
+        const styleClass = colorStyles[note.color] || colorStyles.yellow;
+        return `
+          <div class="p-3.5 rounded-2xl border ${styleClass} shadow-xs flex flex-col justify-between relative group transition hover:shadow-md">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <button onclick="togglePinNote(${note.id})" class="text-xs transition ${note.pinned ? 'opacity-100 scale-110' : 'opacity-40 hover:opacity-100'}" title="${note.pinned ? 'Qadashni bekor qilish' : 'Tepaga qadab qo\'yish'}">
+                📌
+              </button>
+              <div class="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition">
+                <button onclick="copyNoteText(${note.id})" class="hover:text-slate-900 dark:hover:text-white p-1 text-xs" title="Nusxalash">📋</button>
+                <button onclick="deleteNote(${note.id})" class="hover:text-red-500 p-1 text-xs" title="O'chirish">✕</button>
+              </div>
+            </div>
+            <p class="text-xs font-medium whitespace-pre-wrap break-words flex-1 leading-relaxed">${escapeHtml(note.text)}</p>
+            <div class="flex items-center justify-between text-[10px] opacity-60 mt-2.5 pt-1.5 border-t border-black/5 dark:border-white/5 font-mono">
+              <span>${note.date || ''}</span>
+              ${note.pinned ? '<span class="font-bold">Qadalgan</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================
+       8.6 TEZKOR UMUMIY QIDIRUV (INSTANT SEARCH)
+       ======================================================== */
+    function openSearchModal() {
+      openModal('searchModal');
+      const input = document.getElementById('globalSearchInput');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 80);
+        handleGlobalSearch('');
+      }
+    }
+
+    function handleGlobalSearch(query) {
+      const container = document.getElementById('searchResultsList');
+      if (!container) return;
+
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        container.innerHTML = '<p class="text-center text-slate-400 py-8">Qidirish uchun so\'z yozing (masalan: "kitob", "ish", "sport")...</p>';
+        return;
+      }
+
+      let results = [];
+
+      // 1. Kunlik vazifalar
+      if (state.daily) {
+        Object.entries(state.daily).forEach(([date, list]) => {
+          if (Array.isArray(list)) {
+            list.forEach(t => {
+              if (t.text && t.text.toLowerCase().includes(q)) {
+                results.push({
+                  type: 'daily',
+                  title: t.text,
+                  date: date,
+                  completed: t.completed,
+                  category: t.category
+                });
+              }
+            });
+          }
+        });
+      }
+
+      // 2. Eslatmalar
+      if (state.notes) {
+        state.notes.forEach(n => {
+          if (n.text && n.text.toLowerCase().includes(q)) {
+            results.push({
+              type: 'note',
+              title: n.text,
+              date: n.date || 'Eslatma',
+              color: n.color
+            });
+          }
+        });
+      }
+
+      // 3. Haftalik
+      if (state.weekly) {
+        Object.entries(state.weekly).forEach(([week, list]) => {
+          if (Array.isArray(list)) {
+            list.forEach(t => {
+              if (t.text && t.text.toLowerCase().includes(q)) {
+                results.push({
+                  type: 'weekly',
+                  title: t.text,
+                  date: week,
+                  completed: t.completed
+                });
+              }
+            });
+          }
+        });
+      }
+
+      // 4. Oylik va Yillik
+      if (state.monthly) {
+        Object.entries(state.monthly).forEach(([m, list]) => {
+          if (Array.isArray(list)) {
+            list.forEach(t => {
+              if (t.text && t.text.toLowerCase().includes(q)) {
+                results.push({
+                  type: 'monthly',
+                  title: t.text,
+                  date: m,
+                  completed: t.completed
+                });
+              }
+            });
+          }
+        });
+      }
+
+      if (results.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-400">
+            <p class="text-2xl mb-1">🔍</p>
+            <p class="font-medium">"${escapeHtml(q)}" bo'yicha hech narsa topilmadi</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = results.slice(0, 30).map(r => {
+        let typeBadge = '';
+        let clickHandler = '';
+
+        if (r.type === 'daily') {
+          typeBadge = `<span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-md font-semibold">📅 ${r.date}</span>`;
+          clickHandler = `jumpToDailyDate('${r.date}')`;
+        } else if (r.type === 'note') {
+          typeBadge = `<span class="text-[10px] bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-md font-semibold">📌 Eslatma</span>`;
+          clickHandler = `jumpToNotes()`;
+        } else if (r.type === 'weekly') {
+          typeBadge = `<span class="text-[10px] bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-md font-semibold">📆 ${r.date}</span>`;
+          clickHandler = `switchTab('weekly'); closeModal('searchModal');`;
+        } else {
+          typeBadge = `<span class="text-[10px] bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-md font-semibold">🗓️ ${r.date}</span>`;
+          clickHandler = `switchTab('monthly'); closeModal('searchModal');`;
+        }
+
+        return `
+          <div 
+            onclick="${clickHandler}" 
+            class="p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700/40 cursor-pointer flex items-center justify-between gap-2 transition"
+          >
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-medium text-slate-800 dark:text-slate-100 truncate">${highlightSearchKeyword(r.title, q)}</p>
+            </div>
+            <div class="shrink-0 flex items-center gap-1.5">
+              ${typeBadge}
+              ${r.completed ? '<span class="text-emerald-500 text-xs font-bold">✓</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function highlightSearchKeyword(text, keyword) {
+      if (!keyword) return escapeHtml(text);
+      const escaped = escapeHtml(text);
+      const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return escaped.replace(regex, '<mark class="bg-amber-200 dark:bg-amber-900/80 dark:text-white rounded-xs px-0.5">$1</mark>');
+    }
+
+    function jumpToDailyDate(dateStr) {
+      state.selectedDate = dateStr;
+      saveState();
+      closeModal('searchModal');
+      switchTab('daily');
+    }
+
+    function jumpToNotes() {
+      closeModal('searchModal');
+      switchTab('notes');
+    }
+
+    // Ctrl+K tezkor tugmasi
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearchModal();
+      }
+    });
 
     /* ========================================================
        9. POMODORO TAYMER LOGIKASI
@@ -1922,11 +2624,16 @@
     let lastReceivedTimestamp = 0;
 
     function countTotalTasks(obj) {
-      if (!obj || !obj.daily) return 0;
+      if (!obj) return 0;
       let count = 0;
-      Object.values(obj.daily).forEach(list => {
-        if (Array.isArray(list)) count += list.length;
-      });
+      if (obj.daily) {
+        Object.values(obj.daily).forEach(list => {
+          if (Array.isArray(list)) count += list.length;
+        });
+      }
+      if (obj.notes && Array.isArray(obj.notes)) {
+        count += obj.notes.length;
+      }
       return count;
     }
 

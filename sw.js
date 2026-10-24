@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rejapro-v8-full-suite';
+const CACHE_NAME = 'rejapro-v9-pro-features';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

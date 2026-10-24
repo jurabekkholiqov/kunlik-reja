@@ -39,8 +39,22 @@ RejaPro — shaxsiy va professional maqsadlarga erishish uchun mo'ljallangan ken
    - Jami bajarilgan ishlar statistikasi.
    - Motivatsion tavsiyalar.
 
-8. 📱 **Mobil uchun PWA (Progressive Web App):**
-   - Telefonda "Bosh ekranga qo'shish" orqali mustaqil mobil ilovaga aylanadi.
-   - 100% Offline (internetsiz) rejimda to'liq ishlaydi.
-   - Qurilma xotirasida avtomatik saqlanish (LocalStorage).
-   - Zaxira nusxa olish (Export JSON) va qayta tiklash (Import).
+9. 🗓️ **Oylik Ko'rgazmali Kalendar (Visual Heatmap Grid):**
+   - Kunlik bo'limda bir bosishda ochiladigan to'liq oylik kalendar.
+   - Barcha vazifalar bajarilgan kunlar yashil rangda jilolanadi.
+
+10. ⚡ **Tezkor Kunlik Shablonlar (Quick Routines):**
+    - Ertalabki tartib, Samarali ish kuni, O'qish/Dasturlash, Dam olish kunlari uchun 1-tugmali tayyor rejalar.
+
+11. 📌 **Rangli Eslatmalar Doskasi (Sticky Notes):**
+    - Tezkor fikrlar, eslatmalar, parollar yoki g'oyalar stikeri (Sariq, Yashil, Moviy, Pushti).
+    - Muhim eslatmalarni tepaga qadash (Pin) va nusxalash.
+
+12. 🔍 **Tezkor Umumiy Qidiruv (Instant Search - Ctrl+K):**
+    - Barcha kunlik vazifalar, eslatmalar, haftalik va oylik maqsadlar bo'yicha jonli qidiruv.
+
+13. ↩️ **Bekor Qilish (Undo / Qaytarish):**
+    - Vazifa tasodifan o'chirilganda 5 soniya ichida qaytarib tiklash tugmasi.
+
+14. 🔄 **Real-Time Ikki Tomonlama Sinxronizatsiya:**
+    - Noutbuk va telefon o'rtasida soniyadan kam vaqtda avtomatik real-vaqtda sinxronlashish.
