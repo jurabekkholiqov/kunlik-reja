@@ -97,6 +97,12 @@
       <button onclick="switchTab('habits')" id="tabBtn-habits" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
         <span>⚡</span> Odatlar
       </button>
+      <button onclick="switchTab('finance')" id="tabBtn-finance" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>💰</span> Moliya
+      </button>
+      <button onclick="switchTab('journal')" id="tabBtn-journal" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>📝</span> Xulosalar
+      </button>
       <button onclick="switchTab('pomodoro')" id="tabBtn-pomodoro" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
         <span>⏱️</span> Pomodoro
       </button>
@@ -150,10 +156,19 @@
           <input 
             type="text" 
             id="dailyInput" 
-            placeholder="Yangi vazifani yozing..." 
+            placeholder="Yangi vazifani yozing yoki ovoz bilan ayting..." 
             autocomplete="off"
             class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs transition"
           />
+          <button 
+            type="button" 
+            id="voiceBtn" 
+            onclick="toggleVoiceInput()" 
+            class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 px-3 py-2.5 rounded-xl text-base transition flex items-center justify-center shrink-0" 
+            title="Ovoz bilan kiritish (Gapiring)"
+          >
+            🎙️
+          </button>
           <button 
             type="submit" 
             class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-1 shadow-sm shrink-0"
@@ -162,7 +177,7 @@
           </button>
         </div>
         
-        <!-- Prioritet va Kategoriya tanlash -->
+        <!-- Prioritet, Vaqt va Kategoriya tanlash -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
           <span class="text-slate-400 text-[11px] shrink-0">Muhimligi:</span>
           <select id="dailyPriority" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
@@ -170,6 +185,8 @@
             <option value="high">🔴 Yuqori (Shoshilinch)</option>
             <option value="low">🟢 Oddiy</option>
           </select>
+          <span class="text-slate-400 text-[11px] shrink-0 ml-1">Vaqti:</span>
+          <input type="time" id="dailyTime" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 outline-none font-mono" />
           <span class="text-slate-400 text-[11px] shrink-0 ml-1">Kategoriya:</span>
           <select id="dailyCategory" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
             <option value="work">💼 Ish</option>
@@ -180,16 +197,21 @@
         </div>
       </form>
 
-      <!-- Filtrlar -->
+      <!-- Filtrlar va Telegramga Jo'natish -->
       <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
         <div class="flex gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
           <button onclick="setDailyFilter('all')" id="filter-all" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">Hammasi</button>
           <button onclick="setDailyFilter('active')" id="filter-active" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilmagan</button>
           <button onclick="setDailyFilter('completed')" id="filter-completed" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilgan</button>
         </div>
-        <button onclick="clearCompletedDaily()" class="hover:text-red-500 transition py-1 text-[11px]">
-          🗑 Tozalash
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="shareDailyToTelegram()" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 font-semibold text-[11px] flex items-center gap-1 transition py-1" title="Kunlik vazifalarni Telegramga yuborish">
+            <span>✈️</span> Telegramga
+          </button>
+          <button onclick="clearCompletedDaily()" class="hover:text-red-500 transition py-1 text-[11px]">
+            🗑 Tozalash
+          </button>
+        </div>
       </div>
 
       <!-- Vazifalar Ro'yxati -->
@@ -326,7 +348,100 @@
       <div id="habitsList" class="space-y-2.5 flex-1 min-h-[160px]"></div>
     </section>
 
-    <!-- ==================== 6. POMODORO TAYMER ==================== -->
+    <!-- ==================== 6. MOLIYA & XARAJATLAR BO'LIMI ==================== -->
+    <section id="view-finance" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold flex items-center gap-2"><span>💰</span> Kunlik Moliya & Xarajatlar</h2>
+            <p id="financeDateSubtitle" class="text-xs text-emerald-100 mt-0.5">Kunlik tushum va xarajatlar hisoblagichi</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/20 text-center">
+          <div class="bg-white/10 rounded-xl p-2">
+            <p class="text-[10px] text-emerald-200">Daromad</p>
+            <p id="financeTotalIncome" class="text-xs sm:text-sm font-bold text-white">0 so'm</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-2">
+            <p class="text-[10px] text-red-200">Xarajat</p>
+            <p id="financeTotalExpense" class="text-xs sm:text-sm font-bold text-red-100">0 so'm</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-2">
+            <p class="text-[10px] text-emerald-200">Qoldiq</p>
+            <p id="financeNetBalance" class="text-xs sm:text-sm font-bold text-white">0 so'm</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yangi xarajat/daromad kiritish -->
+      <form onsubmit="handleFinanceSubmit(event)" class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5">
+        <div class="flex gap-2">
+          <select id="financeType" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none">
+            <option value="expense">🔴 Xarajat</option>
+            <option value="income">🟢 Daromad</option>
+          </select>
+          <input type="number" id="financeAmount" placeholder="Summa (masalan: 35000)" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500 font-mono" required />
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="financeDesc" placeholder="Izoh (masalan: Tushlik, Yo'l kira, Maosh)..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500" required />
+          <select id="financeCat" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2 text-xs text-slate-700 dark:text-slate-300 outline-none">
+            <option value="food">🍔 Taom</option>
+            <option value="transport">🚕 Transport</option>
+            <option value="shopping">🛍️ Xarid</option>
+            <option value="bills">🏠 Kommunal</option>
+            <option value="salary">💼 Maosh</option>
+            <option value="other">📦 Boshqa</option>
+          </select>
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shrink-0">
+            + Qo'shish
+          </button>
+        </div>
+      </form>
+
+      <!-- Moliya ro'yxati -->
+      <div id="financeList" class="space-y-2 flex-1 min-h-[140px]"></div>
+      <div id="financeEmpty" class="hidden text-center py-10 text-slate-400">
+        <div class="text-3xl mb-1">💳</div>
+        <p class="text-xs">Ushbu kunga xarajat yoki daromad kiritilmagan</p>
+      </div>
+    </section>
+
+    <!-- ==================== 7. KUNLIK XULOSA VA KUNDALIK ==================== -->
+    <section id="view-journal" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-teal-600 to-cyan-700 text-white rounded-2xl p-4 shadow-sm">
+        <h2 class="text-lg font-bold flex items-center gap-2"><span>📝</span> Kun Yakuni Xulosasi</h2>
+        <p class="text-xs text-teal-100 mt-0.5">O'z-o'zini tahlil qilish va kun yakunida minnatdorlik</p>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+            <span>🌟</span> Bugun eng yaxshi kechgan 3 ta voqea / natija:
+          </label>
+          <textarea id="journalWins" rows="2" placeholder="1. Loyihani yakunladim&#10;2. Kitob o'qidim..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-white outline-none focus:ring-1 focus:ring-teal-500 transition"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+            <span>💡</span> Bugungi xulosa yoki olingan saboq:
+          </label>
+          <textarea id="journalLessons" rows="2" placeholder="Chalg'imaslik kerak, vaqtni to'g'ri taqsimlash muhim..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-800 dark:text-white outline-none focus:ring-1 focus:ring-teal-500 transition"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+            <span>🎯</span> Ertangi kun uchun bosh niyat / maqsad:
+          </label>
+          <input type="text" id="journalTomorrow" placeholder="Ertaga ertalabdan asosiy vazifani bitirish..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-white outline-none focus:ring-1 focus:ring-teal-500 transition" />
+        </div>
+
+        <button onclick="saveJournal()" class="w-full bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+          <span>💾</span> Xulosalarni saqlash
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 8. POMODORO TAYMER ==================== -->
     <section id="view-pomodoro" class="tab-view hidden flex-1 flex flex-col items-center justify-center py-6 text-center">
       <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center">
         <!-- Rejim almashtirish -->
@@ -418,6 +533,10 @@
     <button onclick="switchTab('habits')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
       <span class="text-base">⚡</span>
       <span>Odatlar</span>
+    </button>
+    <button onclick="switchTab('finance')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">💰</span>
+      <span>Moliya</span>
     </button>
     <button onclick="switchTab('pomodoro')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
       <span class="text-base">⏱️</span>
@@ -569,6 +688,8 @@
         { id: 3, title: '2 litr suv ichish', icon: '💧', completedDates: {} },
         { id: 4, title: 'Dasturlash yoki yangi bilim', icon: '💻', completedDates: {} }
       ],
+      finance: {},  // { '2026-10-24': [ {id, type, amount, desc, category} ] }
+      journal: {},  // { '2026-10-24': { wins, lessons, tomorrow } }
       settings: { theme: 'auto' }
     };
 
@@ -673,6 +794,8 @@
       if (state.activeTab === 'monthly') renderMonthly();
       if (state.activeTab === 'yearly') renderYearly();
       if (state.activeTab === 'habits') renderHabits();
+      if (state.activeTab === 'finance') renderFinance();
+      if (state.activeTab === 'journal') renderJournal();
       if (state.activeTab === 'stats') renderStats();
     }
 
@@ -720,6 +843,7 @@
 
       const priority = document.getElementById('dailyPriority').value;
       const category = document.getElementById('dailyCategory').value;
+      const time = document.getElementById('dailyTime')?.value || '';
 
       if (!state.daily[state.selectedDate]) {
         state.daily[state.selectedDate] = [];
@@ -730,13 +854,134 @@
         text,
         completed: false,
         priority,
-        category
+        category,
+        time
       });
 
       input.value = '';
+      const timeInput = document.getElementById('dailyTime');
+      if (timeInput) timeInput.value = '';
+
       saveState();
       renderDaily();
       if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    function moveDailyTodo(id, direction) {
+      const list = state.daily[state.selectedDate] || [];
+      const idx = list.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      const targetIdx = idx + direction;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+      const temp = list[idx];
+      list[idx] = list[targetIdx];
+      list[targetIdx] = temp;
+      saveState();
+      renderDaily();
+    }
+
+    let draggedTaskId = null;
+    function handleDragStart(e, id) {
+      draggedTaskId = id;
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', id);
+      }
+    }
+    function handleDragOver(e) {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    }
+    function handleDrop(e, targetId) {
+      e.preventDefault();
+      if (!draggedTaskId || draggedTaskId === targetId) return;
+      const list = state.daily[state.selectedDate] || [];
+      const fromIdx = list.findIndex(t => t.id === draggedTaskId);
+      const toIdx = list.findIndex(t => t.id === targetId);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const [moved] = list.splice(fromIdx, 1);
+        list.splice(toIdx, 0, moved);
+        saveState();
+        renderDaily();
+      }
+      draggedTaskId = null;
+    }
+
+    // Telegram orqali kunlik rejani yuborish
+    function shareDailyToTelegram() {
+      const list = state.daily[state.selectedDate] || [];
+      if (list.length === 0) {
+        alert("Ushbu kunda hali vazifalar yo'q!");
+        return;
+      }
+
+      const dateParts = state.selectedDate.split('-').map(Number);
+      const d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const dateStr = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      let msg = `📋 Kunlik Rejalarim (${dateStr}):\n\n`;
+      list.forEach((t, i) => {
+        const status = t.completed ? '✅' : '⬜';
+        const timeBadge = t.time ? `[🕒 ${t.time}] ` : '';
+        msg += `${status} ${i + 1}. ${timeBadge}${t.text}\n`;
+      });
+
+      msg += `\n🎯 RejaPro: ${window.location.origin}${window.location.pathname}`;
+      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin + window.location.pathname)}&text=${encodeURIComponent(msg)}`;
+      window.open(tgUrl, '_blank');
+    }
+
+    // Ovozli kiritish (Voice-to-Task)
+    let recognition = null;
+    let isListening = false;
+    function toggleVoiceInput() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        alert("Kechirasiz, brauzeringiz ovozli kiritishni qo'llab-quvvatlamaydi (Google Chrome yoki Safari tavsiya etiladi).");
+        return;
+      }
+
+      const btn = document.getElementById('voiceBtn');
+      if (isListening && recognition) {
+        recognition.stop();
+        return;
+      }
+
+      recognition = new SpeechRec();
+      recognition.lang = 'uz-UZ';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        isListening = true;
+        btn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+        btn.textContent = '🛑';
+        showSyncToast('🎙️ Gapiring, tinglayapman...');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('dailyInput');
+        if (input) {
+          input.value = transcript;
+          input.focus();
+          showSyncToast(`🎙️ "${transcript}"`);
+        }
+      };
+
+      recognition.onerror = () => {
+        recognition.lang = 'ru-RU';
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        btn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+        btn.textContent = '🎙️';
+      };
+
+      try {
+        recognition.start();
+      } catch (e) {}
     }
 
     function toggleDailyTodo(id) {
@@ -810,12 +1055,28 @@
             ? '<span class="text-[10px] bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">Oddiy</span>'
             : '';
 
+          const timeBadge = t.time 
+            ? `<span class="text-[10px] bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-md font-semibold font-mono flex items-center gap-0.5 shrink-0">🕒 ${t.time}</span>` 
+            : '';
+
           const catIcons = { work: '💼', study: '📚', personal: '👤', health: '🏃' };
           const catIcon = catIcons[t.category] || '📌';
 
           return `
-            <div class="group flex items-center justify-between p-3 rounded-2xl border ${t.completed ? 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} hover:border-emerald-500/50 transition gap-3">
-              <label class="flex items-center gap-3 cursor-pointer flex-1 select-none min-w-0">
+            <div 
+              draggable="true" 
+              ondragstart="handleDragStart(event, ${t.id})" 
+              ondragover="handleDragOver(event)" 
+              ondrop="handleDrop(event, ${t.id})" 
+              class="group flex items-center justify-between p-3 rounded-2xl border ${t.completed ? 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} hover:border-emerald-500/50 transition gap-2 cursor-grab active:cursor-grabbing"
+            >
+              <!-- Tartiblash tugmalari (▲ / ▼) -->
+              <div class="flex flex-col gap-0.5 opacity-30 group-hover:opacity-100 transition no-print shrink-0 text-slate-400">
+                <button onclick="moveDailyTodo(${t.id}, -1)" class="hover:text-emerald-600 text-[9px] leading-none" title="Yuqoriga surish">▲</button>
+                <button onclick="moveDailyTodo(${t.id}, 1)" class="hover:text-emerald-600 text-[9px] leading-none" title="Pastga surish">▼</button>
+              </div>
+
+              <label class="flex items-center gap-2.5 cursor-pointer flex-1 select-none min-w-0">
                 <input 
                   type="checkbox" 
                   ${t.completed ? 'checked' : ''} 
@@ -828,10 +1089,12 @@
                     <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'} break-words">
                       ${escapeHtml(t.text)}
                     </span>
+                    ${timeBadge}
                     ${priorityBadge}
                   </div>
                 </div>
               </label>
+
               <button 
                 onclick="deleteDailyTodo(${t.id})" 
                 class="opacity-60 sm:opacity-0 group-hover:opacity-100 hover:text-red-500 text-slate-400 dark:text-slate-500 text-sm px-2 py-1 rounded transition no-print shrink-0"
@@ -1280,6 +1543,149 @@
         "\"Eng yaxshi vaqt — aynan hozirgi vaqt!\""
       ];
       document.getElementById('motivationalQuote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+    }
+
+    /* ========================================================
+       10.1 MOLIYA VA XARAJATLAR LOGIKASI
+       ======================================================== */
+    function handleFinanceSubmit(e) {
+      e.preventDefault();
+      const type = document.getElementById('financeType').value;
+      const amount = Number(document.getElementById('financeAmount').value);
+      const desc = document.getElementById('financeDesc').value.trim();
+      const category = document.getElementById('financeCat').value;
+      if (!amount || !desc) return;
+
+      if (!state.finance) state.finance = {};
+      if (!state.finance[state.selectedDate]) state.finance[state.selectedDate] = [];
+
+      state.finance[state.selectedDate].unshift({
+        id: Date.now(),
+        type,
+        amount,
+        desc,
+        category
+      });
+
+      document.getElementById('financeAmount').value = '';
+      document.getElementById('financeDesc').value = '';
+      saveState();
+      renderFinance();
+      if (navigator.vibrate) navigator.vibrate(25);
+    }
+
+    function deleteFinance(id) {
+      if (!state.finance || !state.finance[state.selectedDate]) return;
+      state.finance[state.selectedDate] = state.finance[state.selectedDate].filter(f => f.id !== id);
+      saveState();
+      renderFinance();
+    }
+
+    function renderFinance() {
+      const parts = state.selectedDate.split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      const dateFormatted = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const sub = document.getElementById('financeDateSubtitle');
+      if (sub) sub.textContent = `${dateFormatted} — hisob-kitobi`;
+
+      const list = (state.finance && state.finance[state.selectedDate]) || [];
+      let income = 0;
+      let expense = 0;
+
+      list.forEach(item => {
+        if (item.type === 'income') income += Number(item.amount) || 0;
+        else expense += Number(item.amount) || 0;
+      });
+
+      const net = income - expense;
+      document.getElementById('financeTotalIncome').textContent = income.toLocaleString('uz-UZ') + " so'm";
+      document.getElementById('financeTotalExpense').textContent = expense.toLocaleString('uz-UZ') + " so'm";
+      document.getElementById('financeNetBalance').textContent = (net >= 0 ? '+' : '') + net.toLocaleString('uz-UZ') + " so'm";
+
+      const listEl = document.getElementById('financeList');
+      const emptyEl = document.getElementById('financeEmpty');
+
+      if (list.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        const catIcons = { food: '🍔', transport: '🚕', shopping: '🛍️', bills: '🏠', salary: '💼', other: '📦' };
+
+        listEl.innerHTML = list.map(item => `
+          <div class="flex items-center justify-between p-3 rounded-2xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="text-base p-1.5 rounded-xl bg-slate-100 dark:bg-slate-700">${catIcons[item.category] || '📦'}</span>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(item.desc)}</p>
+                <p class="text-[10px] text-slate-400 capitalize">${item.type === 'income' ? 'Tushum' : 'Xarajat'}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs font-mono font-bold ${item.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">
+                ${item.type === 'income' ? '+' : '-'}${Number(item.amount).toLocaleString('uz-UZ')} so'm
+              </span>
+              <button onclick="deleteFinance(${item.id})" class="text-slate-400 hover:text-red-500 text-xs p-1">✕</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    /* ========================================================
+       10.2 KUNLIK XULOSA VA KUNDALIK LOGIKASI
+       ======================================================== */
+    function saveJournal() {
+      if (!state.journal) state.journal = {};
+      state.journal[state.selectedDate] = {
+        wins: document.getElementById('journalWins').value,
+        lessons: document.getElementById('journalLessons').value,
+        tomorrow: document.getElementById('journalTomorrow').value
+      };
+      saveState();
+      showSyncToast('💾 Kun xulosalari saqlandi!');
+      if (navigator.vibrate) navigator.vibrate(30);
+    }
+
+    function renderJournal() {
+      const current = (state.journal && state.journal[state.selectedDate]) || { wins: '', lessons: '', tomorrow: '' };
+      document.getElementById('journalWins').value = current.wins || '';
+      document.getElementById('journalLessons').value = current.lessons || '';
+      document.getElementById('journalTomorrow').value = current.tomorrow || '';
+    }
+
+    /* ========================================================
+       10.3 VAZIFALAR BUDILNIGI VA ESLATMALAR
+       ======================================================== */
+    function initTaskReminders() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+
+      setInterval(() => {
+        const now = new Date();
+        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const todayStr = getTodayString();
+        const list = state.daily[todayStr] || [];
+
+        list.forEach(t => {
+          if (!t.completed && t.time === currentTime && !t.notified) {
+            t.notified = true;
+            playBeep(800, 0.3);
+            setTimeout(() => playBeep(1000, 0.4), 300);
+            if ('Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification('⏰ RejaPro Eslatma!', {
+                  body: `Vaqti bo'ldi: ${t.text}`,
+                  icon: 'icon-192.png'
+                });
+              } catch (e) {}
+            }
+            showSyncToast(`⏰ Eslatma: ${t.text}`);
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+          }
+        });
+      }, 30000);
     }
 
     /* ========================================================
@@ -1771,6 +2177,7 @@
     // Dastur ishga tushishi
     initTheme();
     updatePomoDisplay();
+    initTaskReminders();
     migrateOldData();
     const imported = checkUrlHashImport();
     if (!imported) {
