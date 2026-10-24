@@ -9,6 +9,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -62,6 +63,9 @@
       
       <!-- O'ng tomondagi tugmalar -->
       <div class="flex items-center gap-1.5">
+        <button id="headerInstallBtn" onclick="triggerAppInstall()" class="text-xs bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition">
+          <span>📲</span> <span class="hidden sm:inline">Ilovani</span> O'rnatish
+        </button>
         <button onclick="openModal('backupModal')" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Zaxira va Sozlamalar">
           ⚙️
         </button>
@@ -443,6 +447,60 @@
           ⚠️ Hamma ma'lumotlarni tozalash
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Avtomatik Ilovani O'rnatish Banneri (Bottom Banner) -->
+  <div id="installBanner" class="hidden fixed bottom-16 sm:bottom-5 inset-x-4 max-w-md mx-auto bg-white dark:bg-slate-800 border-2 border-emerald-500 rounded-3xl p-4 shadow-2xl z-50 transition-all duration-300">
+    <div class="flex items-start gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-2xl font-bold shrink-0 shadow-md">
+        ✓
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-1">
+          <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+            RejaPro Ilovasi
+            <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">Tezkor</span>
+          </h4>
+          <button onclick="dismissInstallBanner()" class="text-slate-400 hover:text-slate-600 text-sm p-1">✕</button>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          Telefoningizga to'liq mustaqil ilova qilib o'rnating. Internetsiz, tezkor va qulay ishlaydi!
+        </p>
+        <div class="flex items-center gap-2 mt-3">
+          <button onclick="triggerAppInstall()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs py-2.5 px-3 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+            <span>⚡</span> Ilovani o'rnatish
+          </button>
+          <button onclick="dismissInstallBanner()" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 py-2.5 px-3 rounded-xl font-medium">
+            Keyinroq
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS (iPhone Safari) uchun O'rnatish Qo'llanmasi Modali -->
+  <div id="iosInstallModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <span>🍏</span> iPhone'ga o'rnatish:
+        </h3>
+        <button onclick="closeModal('iosInstallModal')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+        <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50">
+          <span class="text-2xl shrink-0">1️⃣</span>
+          <span>Safari brauzerining pastki qismidagi <b>"Ulashish" (Share / ⎋)</b> tugmasini bosing</span>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50">
+          <span class="text-2xl shrink-0">2️⃣</span>
+          <span>Ro'yxatdan <b>"Bosh ekranga qo'shish" (+ На экран «Домой»)</b> bandini tanlang</span>
+        </div>
+      </div>
+      <button onclick="closeModal('iosInstallModal')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+        Tushunarli
+      </button>
     </div>
   </div>
 
@@ -1316,6 +1374,79 @@
       if (!str) return '';
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
+
+    /* ========================================================
+       14. PWA ILOVANI AVTOMATIK O'RNATISH & TELEGRAM INTEGRATSIYASI
+       ======================================================== */
+    let deferredPrompt = null;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    // Service Worker ro'yxatdan o'tkazish
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW xatolik:', err);
+        });
+      });
+    }
+
+    // Brauzerning avtomatik o'rnatish hodisasi
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Agar ilova hali o'rnatilmagan bo'lsa va bu sessiyada rad etilmagan bo'lsa
+      if (!isStandalone && !sessionStorage.getItem('install_dismissed')) {
+        setTimeout(() => {
+          document.getElementById('installBanner')?.classList.remove('hidden');
+        }, 1200);
+      }
+    });
+
+    function triggerAppInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('installBanner')?.classList.add('hidden');
+            document.getElementById('headerInstallBtn')?.classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
+      } else if (isIOS) {
+        openModal('iosInstallModal');
+      } else if (isStandalone) {
+        alert("✅ RejaPro ilovasi allaqachon qurilmangizga o'rnatilgan!");
+      } else {
+        // Android / PC Chrome qo'llanmasi
+        alert("📲 Ilovani o'rnatish uchun brauzer menyusidagi (uchta nuqta ⋮) 'Bosh ekranga qo'shish' yoki 'Ilovani o'rnatish' bandini tanlang.");
+      }
+    }
+
+    function dismissInstallBanner() {
+      document.getElementById('installBanner')?.classList.add('hidden');
+      sessionStorage.setItem('install_dismissed', 'true');
+    }
+
+    // Telegram Mini App integratsiyasi
+    if (window.Telegram && window.Telegram.WebApp) {
+      try {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        // Telegram ichida bo'lsa o'rnatish tugmasi kerak emas
+        document.getElementById('headerInstallBtn')?.classList.add('hidden');
+        document.getElementById('installBanner')?.classList.add('hidden');
+      } catch (e) {}
+    }
+
+    // Ilova o'rnatilganda bildirishnoma
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner')?.classList.add('hidden');
+      document.getElementById('headerInstallBtn')?.classList.add('hidden');
+      deferredPrompt = null;
+    });
 
     // Dastur ishga tushishi
     initTheme();

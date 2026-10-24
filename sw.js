@@ -1,9 +1,11 @@
-const CACHE_NAME = 'kunlik-reja-v1';
+const CACHE_NAME = 'rejapro-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
