@@ -63,6 +63,11 @@
       
       <!-- O'ng tomondagi tugmalar -->
       <div class="flex items-center gap-1.5">
+        <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
+          <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="hidden sm:inline">Sinxron</span>
+          <span id="syncStatusIcon">☁️</span>
+        </button>
         <button id="headerInstallBtn" onclick="triggerAppInstall()" class="text-xs bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition">
           <span>📲</span> <span class="hidden sm:inline">Ilovani</span> O'rnatish
         </button>
@@ -450,6 +455,60 @@
     </div>
   </div>
 
+  <!-- Sinxronizatsiya va Telefonga Ulash Modali -->
+  <div id="syncModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <span>🔄</span> Telefonga Ulash & Sinxronlash
+        </h3>
+        <button onclick="closeModal('syncModal')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Saytda qo'shgan vazifalaringiz telefoningizda ham bir zumda ko'rinishi uchun quyidagi usuldan foydalaning:
+      </p>
+
+      <!-- 1-usul: QR Kod -->
+      <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/40 text-center space-y-2 border border-slate-100 dark:border-slate-700">
+        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">1-usul: Telefon kamerasi bilan skaner qiling</p>
+        <div class="flex justify-center p-2 bg-white rounded-xl max-w-[160px] mx-auto shadow-xs">
+          <img id="syncQrImg" src="" alt="QR Kod" class="w-32 h-32 object-contain" />
+        </div>
+        <p class="text-[11px] text-slate-400">QR kodni oching — telefoningizdagi ilovada barcha 6 ta va keyingi vazifalar darhol paydo bo'ladi!</p>
+      </div>
+
+      <!-- 2-usul: Sinxronizatsiya Kodi -->
+      <div class="space-y-2 pt-1">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-medium">Sizning sinxronlash kodingiz:</span>
+          <span id="currentSyncKeyText" class="font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded">bbedadc</span>
+        </div>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="syncKeyInput" 
+            placeholder="Kodni kiriting (masalan: bbedadc)..." 
+            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+          <button onclick="connectManualSyncKey()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-xl transition shrink-0">
+            Ulash
+          </button>
+        </div>
+      </div>
+
+      <!-- Pastki tugmalar -->
+      <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex gap-2">
+        <button onclick="forceSyncNow()" class="flex-1 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+          <span>☁️</span> Hozir sinxronlash
+        </button>
+        <button onclick="copySyncLink()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl transition">
+          Nusxalash
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Avtomatik Ilovani O'rnatish Banneri (Bottom Banner) -->
   <div id="installBanner" class="hidden fixed bottom-16 sm:bottom-5 inset-x-4 max-w-md mx-auto bg-white dark:bg-slate-800 border-2 border-emerald-500 rounded-3xl p-4 shadow-2xl z-50 transition-all duration-300">
     <div class="flex items-start gap-3">
@@ -562,10 +621,17 @@
       return initial;
     }
 
-    function saveState() {
+    function saveLocalOnly() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {}
+    }
+
+    function saveState() {
+      saveLocalOnly();
+      if (typeof pushToCloudDebounced === 'function') {
+        pushToCloudDebounced();
+      }
     }
 
     /* ========================================================
@@ -1448,10 +1514,186 @@
       deferredPrompt = null;
     });
 
+    /* ========================================================
+       15. BULUTLI REAL-TIME SINXRONIZATSIYA (CLOUD SYNC)
+       ======================================================== */
+    const DEFAULT_SYNC_KEY = 'bbedadc';
+    let syncKey = localStorage.getItem('rejapro_sync_key') || DEFAULT_SYNC_KEY;
+    let isSyncing = false;
+    let syncTimeout = null;
+
+    function countTotalTasks(obj) {
+      if (!obj || !obj.daily) return 0;
+      let count = 0;
+      Object.values(obj.daily).forEach(list => {
+        if (Array.isArray(list)) count += list.length;
+      });
+      return count;
+    }
+
+    function setSyncIndicator(status) {
+      const dot = document.getElementById('syncStatusDot');
+      const icon = document.getElementById('syncStatusIcon');
+      if (!dot || !icon) return;
+
+      if (status === 'loading') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-spin';
+        icon.textContent = '⏳';
+      } else if (status === 'success') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        icon.textContent = '☁️';
+      } else if (status === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-red-500';
+        icon.textContent = '⚠️';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        icon.textContent = '🔄';
+      }
+    }
+
+    function pushToCloudDebounced() {
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        pushToCloud();
+      }, 400);
+    }
+
+    async function pushToCloud() {
+      if (!syncKey || isSyncing) return;
+      isSyncing = true;
+      setSyncIndicator('loading');
+      try {
+        const res = await fetch(`https://extendsclass.com/api/json-storage/bin/${syncKey}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+        if (res.ok) {
+          setSyncIndicator('success');
+        } else {
+          setSyncIndicator('error');
+        }
+      } catch (e) {
+        setSyncIndicator('error');
+      } finally {
+        isSyncing = false;
+      }
+    }
+
+    async function pullFromCloud(key = syncKey, alertOnSuccess = false) {
+      if (!key) return;
+      setSyncIndicator('loading');
+      try {
+        const res = await fetch(`https://extendsclass.com/api/json-storage/bin/${key}?t=${Date.now()}`);
+        if (res.ok) {
+          const cloudData = await res.json();
+          if (cloudData && typeof cloudData === 'object' && cloudData.daily) {
+            state = { ...defaultState, ...cloudData };
+            saveLocalOnly();
+            renderCurrentTab();
+            setSyncIndicator('success');
+            if (alertOnSuccess) {
+              alert("✅ Vazifalaringiz bulutdan muvaffaqiyatli yuklandi!");
+            }
+            return;
+          }
+        }
+        setSyncIndicator('idle');
+      } catch (e) {
+        setSyncIndicator('error');
+      }
+    }
+
+    async function smartInitialSync() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSyncKey = urlParams.get('sync');
+
+      if (urlSyncKey && urlSyncKey.trim()) {
+        syncKey = urlSyncKey.trim();
+        localStorage.setItem('rejapro_sync_key', syncKey);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        await pullFromCloud(syncKey, true);
+        return;
+      }
+
+      // Agar URLda sync yo'q bo'lsa: mahalliy va bulutni taqqoslaymiz
+      const localCount = countTotalTasks(state);
+      try {
+        setSyncIndicator('loading');
+        const res = await fetch(`https://extendsclass.com/api/json-storage/bin/${syncKey}?t=${Date.now()}`);
+        if (res.ok) {
+          const cloudData = await res.json();
+          const cloudCount = countTotalTasks(cloudData);
+
+          if (localCount >= cloudCount && localCount > 3) {
+            // Kompyuterdagi mahalliy vazifalar ko'p -> Bulutga yuklaymiz!
+            await pushToCloud();
+          } else if (cloudCount > 0) {
+            // Bulutda ko'proq ma'lumot bor (masalan telefonda ochganda) -> Bulutdan olamiz!
+            state = { ...defaultState, ...cloudData };
+            saveLocalOnly();
+            renderCurrentTab();
+            setSyncIndicator('success');
+          }
+        }
+      } catch (e) {
+        setSyncIndicator('idle');
+      }
+    }
+
+    function openSyncModal() {
+      const qrImg = document.getElementById('syncQrImg');
+      const keyText = document.getElementById('currentSyncKeyText');
+      const keyInput = document.getElementById('syncKeyInput');
+
+      if (keyText) keyText.textContent = syncKey;
+      if (keyInput) keyInput.value = syncKey;
+
+      const currentUrl = `${window.location.origin}${window.location.pathname}?sync=${syncKey}`;
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}`;
+      }
+
+      openModal('syncModal');
+    }
+
+    function connectManualSyncKey() {
+      const input = document.getElementById('syncKeyInput');
+      const newKey = input.value.trim();
+      if (!newKey) return;
+      syncKey = newKey;
+      localStorage.setItem('rejapro_sync_key', syncKey);
+      pullFromCloud(syncKey, true);
+      closeModal('syncModal');
+    }
+
+    function forceSyncNow() {
+      pushToCloud().then(() => {
+        alert("✅ Barcha rejalaringiz bulutga muvaffaqiyatli saqlandi!");
+      });
+    }
+
+    function copySyncLink() {
+      const currentUrl = `${window.location.origin}${window.location.pathname}?sync=${syncKey}`;
+      navigator.clipboard.writeText(currentUrl).then(() => {
+        alert("✅ Havola nusxalandi! Ushbu havolani telefoningizda oching.");
+      }).catch(() => {
+        prompt("Ushbu havolani nusxalab oling:", currentUrl);
+      });
+    }
+
+    // Telefon ekrani qayta ochilganda bulutdan yangilash
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        pullFromCloud();
+      }
+    });
+
     // Dastur ishga tushishi
     initTheme();
     updatePomoDisplay();
     switchTab('daily');
+    smartInitialSync();
   </script>
 </body>
 </html>
