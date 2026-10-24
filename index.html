@@ -615,8 +615,8 @@
 
     function saveState() {
       saveLocalOnly();
-      if (typeof pushToCloudDebounced === 'function') {
-        pushToCloudDebounced();
+      if (typeof pushToSyncDebounced === 'function') {
+        pushToSyncDebounced();
       }
     }
 
@@ -1501,13 +1501,179 @@
     });
 
     /* ========================================================
-       15. DIRECT DATA TRANSFER & CLOUD SYNCHRONIZATION
+       15. REAL-TIME MULTI-DEVICE BIDIRECTIONAL SYNCHRONIZATION
        ======================================================== */
-    const CLOUD_API_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a16ee545f27f9e';
-    let isSyncing = false;
-    let syncTimeout = null;
+    const DEFAULT_TOPIC = 'reja_jurabek_kholiqov_2026';
+    let syncTopic = localStorage.getItem('rejapro_sync_topic') || DEFAULT_TOPIC;
+    let myDeviceId = localStorage.getItem('rejapro_device_id');
+    if (!myDeviceId) {
+      myDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+      localStorage.setItem('rejapro_device_id', myDeviceId);
+    }
 
-    // 1. To'g'ridan-to'g'ri havoladan import qilish (#import=...)
+    let syncTimeout = null;
+    let sseClient = null;
+    let lastReceivedTimestamp = 0;
+
+    function countTotalTasks(obj) {
+      if (!obj || !obj.daily) return 0;
+      let count = 0;
+      Object.values(obj.daily).forEach(list => {
+        if (Array.isArray(list)) count += list.length;
+      });
+      return count;
+    }
+
+    function setSyncIndicator(status) {
+      const dot = document.getElementById('syncStatusDot');
+      const icon = document.getElementById('syncStatusIcon');
+      if (!dot || !icon) return;
+
+      if (status === 'loading') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-spin';
+        icon.textContent = '⏳';
+      } else if (status === 'success') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        icon.textContent = '🟢';
+      } else if (status === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-red-500';
+        icon.textContent = '⚠️';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        icon.textContent = '🔄';
+      }
+    }
+
+    function showSyncToast(msg) {
+      let toast = document.getElementById('syncToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'syncToast';
+        toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg z-50 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 2500);
+    }
+
+    // 1. O'zgarishlarni real vaqtda uzatish (PUSH)
+    function pushToSyncDebounced() {
+      clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        pushToSync();
+      }, 300);
+    }
+
+    async function pushToSync() {
+      setSyncIndicator('loading');
+      try {
+        const payload = {
+          senderId: myDeviceId,
+          timestamp: Date.now(),
+          state: state
+        };
+        const res = await fetch(`https://ntfy.sh/${syncTopic}`, {
+          method: 'POST',
+          headers: {
+            'Title': 'RejaPro Realtime Sync',
+            'Tags': 'arrows_counterclockwise'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          setSyncIndicator('success');
+        } else {
+          setSyncIndicator('error');
+        }
+      } catch (e) {
+        setSyncIndicator('error');
+      }
+    }
+
+    // 2. Real-time qabul qilish (SSE - Server-Sent Events)
+    function connectRealtimeSSE() {
+      if (sseClient) {
+        try { sseClient.close(); } catch (e) {}
+      }
+      try {
+        sseClient = new EventSource(`https://ntfy.sh/${syncTopic}/sse`);
+        sseClient.onopen = () => {
+          setSyncIndicator('success');
+        };
+        sseClient.onmessage = (event) => {
+          try {
+            const ntfyMsg = JSON.parse(event.data);
+            if (ntfyMsg.event === 'message') {
+              const payload = JSON.parse(ntfyMsg.message);
+              if (payload && payload.senderId !== myDeviceId && payload.state) {
+                if (!payload.timestamp || payload.timestamp > lastReceivedTimestamp) {
+                  lastReceivedTimestamp = payload.timestamp || Date.now();
+                  state = { ...defaultState, ...payload.state };
+                  saveLocalOnly();
+                  renderCurrentTab();
+                  showSyncToast('⚡ Qurilmalar sinxronlandi!');
+                  setSyncIndicator('success');
+                }
+              }
+            }
+          } catch (e) {}
+        };
+        sseClient.onerror = () => {
+          setSyncIndicator('idle');
+        };
+      } catch (e) {}
+    }
+
+    // 3. Dastlabki yuklanishda so'nggi holatni olish (Poll)
+    async function initialPollAndSync() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlTopic = urlParams.get('topic') || urlParams.get('sync');
+      if (urlTopic && urlTopic.trim()) {
+        syncTopic = urlTopic.trim();
+        localStorage.setItem('rejapro_sync_topic', syncTopic);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      connectRealtimeSSE();
+
+      const localCount = countTotalTasks(state);
+      try {
+        setSyncIndicator('loading');
+        const res = await fetch(`https://ntfy.sh/${syncTopic}/json?poll=1`);
+        if (res.ok) {
+          const text = await res.text();
+          const lines = text.trim().split('\n').filter(Boolean);
+          if (lines.length > 0) {
+            const lastItem = JSON.parse(lines[lines.length - 1]);
+            if (lastItem && lastItem.message) {
+              const payload = JSON.parse(lastItem.message);
+              if (payload && payload.state) {
+                const remoteCount = countTotalTasks(payload.state);
+                if (remoteCount >= localCount && remoteCount > 0) {
+                  state = { ...defaultState, ...payload.state };
+                  saveLocalOnly();
+                  renderCurrentTab();
+                  setSyncIndicator('success');
+                  return;
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {}
+
+      // Agar ushbu qurilmada vazifalar ko'p bo'lsa (masalan Laptopda 6 ta vazifa):
+      if (localCount > 0) {
+        await pushToSync();
+      }
+    }
+
+    // 4. To'g'ridan-to'g'ri havoladan import (#import=...) va QR kod
     function checkUrlHashImport() {
       if (window.location.hash && window.location.hash.startsWith('#import=')) {
         try {
@@ -1520,29 +1686,25 @@
             renderCurrentTab();
             window.location.hash = '';
             alert("✅ Barcha vazifalaringiz telefoningizga muvaffaqiyatli ko'chirildi!");
-            pushToCloud();
+            pushToSync();
             return true;
           }
-        } catch (e) {
-          console.log('Hash import error:', e);
-        }
+        } catch (e) {}
       }
       return false;
     }
 
-    // 2. To'g'ridan-to'g'ri ko'chirish havolasini yasash (Data-in-URL)
     function getDirectShareUrl() {
       try {
         const jsonStr = JSON.stringify(state);
         const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
         const encoded = encodeURIComponent(b64);
-        return `${window.location.origin}${window.location.pathname}#import=${encoded}`;
+        return `${window.location.origin}${window.location.pathname}?sync=${syncTopic}#import=${encoded}`;
       } catch (e) {
         return window.location.href;
       }
     }
 
-    // 3. QR Kod va Telegram orqali uzatish
     function openSyncModal() {
       const shareUrl = getDirectShareUrl();
       const qrImg = document.getElementById('syncQrImg');
@@ -1567,86 +1729,9 @@
       });
     }
 
-    // 4. Bulutli sinxronizatsiya (REST API - restful-api.dev)
-    function setSyncIndicator(status) {
-      const dot = document.getElementById('syncStatusDot');
-      const icon = document.getElementById('syncStatusIcon');
-      if (!dot || !icon) return;
-
-      if (status === 'loading') {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-spin';
-        icon.textContent = '⏳';
-      } else if (status === 'success') {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-        icon.textContent = '☁️';
-      } else if (status === 'error') {
-        dot.className = 'w-2 h-2 rounded-full bg-red-500';
-        icon.textContent = '⚠️';
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
-        icon.textContent = '🔄';
-      }
-    }
-
-    function pushToCloudDebounced() {
-      clearTimeout(syncTimeout);
-      syncTimeout = setTimeout(() => {
-        pushToCloud();
-      }, 500);
-    }
-
-    async function pushToCloud() {
-      if (isSyncing) return;
-      isSyncing = true;
-      setSyncIndicator('loading');
-      try {
-        const res = await fetch(CLOUD_API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'jurabek_reja',
-            data: state
-          })
-        });
-        if (res.ok) {
-          setSyncIndicator('success');
-        } else {
-          setSyncIndicator('error');
-        }
-      } catch (e) {
-        setSyncIndicator('error');
-      } finally {
-        isSyncing = false;
-      }
-    }
-
-    async function pullFromCloud(alertOnSuccess = false) {
-      setSyncIndicator('loading');
-      try {
-        const res = await fetch(`${CLOUD_API_URL}?t=${Date.now()}`);
-        if (res.ok) {
-          const resp = await res.json();
-          const cloudState = resp?.data;
-          if (cloudState && typeof cloudState === 'object' && cloudState.daily) {
-            state = { ...defaultState, ...cloudState };
-            saveLocalOnly();
-            renderCurrentTab();
-            setSyncIndicator('success');
-            if (alertOnSuccess) {
-              alert("✅ Vazifalaringiz bulutdan muvaffaqiyatli yuklandi!");
-            }
-            return;
-          }
-        }
-        setSyncIndicator('idle');
-      } catch (e) {
-        setSyncIndicator('error');
-      }
-    }
-
     function forceCloudSync() {
-      pushToCloud().then(() => {
-        alert("✅ Vazifalar bulutga saqlandi!");
+      pushToSync().then(() => {
+        alert("✅ Vazifalar real-time bulutga saqlandi!");
       });
     }
 
@@ -1665,7 +1750,7 @@
                 state.daily[today] = oldList;
                 saveLocalOnly();
                 renderCurrentTab();
-                pushToCloud();
+                pushToSync();
                 break;
               }
             }
@@ -1674,47 +1759,12 @@
       } catch (e) {}
     }
 
-    function countTotalTasks(obj) {
-      if (!obj || !obj.daily) return 0;
-      let count = 0;
-      Object.values(obj.daily).forEach(list => {
-        if (Array.isArray(list)) count += list.length;
-      });
-      return count;
-    }
-
-    async function initialSmartSync() {
-      const localCount = countTotalTasks(state);
-      try {
-        setSyncIndicator('loading');
-        const res = await fetch(`${CLOUD_API_URL}?t=${Date.now()}`);
-        if (res.ok) {
-          const resp = await res.json();
-          const cloudState = resp?.data;
-          const cloudCount = countTotalTasks(cloudState);
-
-          if (localCount > cloudCount) {
-            // Kompyuterda ko'proq vazifalar bor -> Bulutga yuklaymiz!
-            await pushToCloud();
-          } else if (cloudCount > 0 && cloudCount >= localCount) {
-            // Bulutda ko'proq ma'lumot bor -> Bulutdan yuklaymiz!
-            state = { ...defaultState, ...cloudState };
-            saveLocalOnly();
-            renderCurrentTab();
-            setSyncIndicator('success');
-          } else {
-            setSyncIndicator('idle');
-          }
-        }
-      } catch (e) {
-        setSyncIndicator('idle');
-      }
-    }
-
-    // Telefon ekrani ochilganda bulutdan yangilash
+    // Telefon ekrani ochilganda yoki tabga qaytilganda qayta ulanish
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        pullFromCloud();
+        if (!sseClient || sseClient.readyState === EventSource.CLOSED) {
+          connectRealtimeSSE();
+        }
       }
     });
 
@@ -1724,7 +1774,7 @@
     migrateOldData();
     const imported = checkUrlHashImport();
     if (!imported) {
-      initialSmartSync();
+      initialPollAndSync();
     }
     switchTab('daily');
   </script>
