@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kunlik Reja — Vazifalar & Checklist</title>
-  <meta name="description" content="Sodda va qulay kunlik vazifalar ro'yxati">
+  <title>RejaPro — Kunlik, Haftalik, Oylik va Yillik Hayot Rejalari</title>
+  <meta name="description" content="Keng qamrovli hayot va reja boshqaruvi: kunlik vazifalar, haftalik/oylik/yillik maqsadlar, odatlar trekeri va pomodoro">
   <meta name="theme-color" content="#10b981">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -21,7 +21,7 @@
               100: '#d1fae5',
               500: '#10b981',
               600: '#059669',
-              700: '#047857',
+              700: '#047857'
             }
           }
         }
@@ -29,9 +29,12 @@
     }
   </script>
   <style>
-    /* Mobile-optimized touch styling */
     * { -webkit-tap-highlight-color: transparent; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
     @media print {
       body { background: white !important; color: black !important; }
       .no-print { display: none !important; }
@@ -39,104 +42,1258 @@
     }
   </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col justify-between">
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
 
-  <!-- Asosiy Konteyner -->
-  <main class="w-full max-w-lg mx-auto p-4 sm:p-6 flex-1 flex flex-col">
-    
-    <!-- Yuqori panel: Sarlavha, Sana va Mavzu tugmasi -->
-    <header class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 dark:border-slate-800">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-          <span class="text-2xl">📋</span> Kunlik Reja
-        </h1>
-        <p id="todayDate" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5 capitalize"></p>
+  <!-- Confetti Canvas (100% bajarilganda) -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- Yuqori Asosiy Header -->
+  <header class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          ✓
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">RejaPro</h1>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Shaxsiy samaradorlik tizimi</p>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <!-- Mavzu (Dark/Light) almashtirish -->
-        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Mavzuni o'zgartirish">
+      
+      <!-- O'ng tomondagi tugmalar -->
+      <div class="flex items-center gap-1.5">
+        <button onclick="openModal('backupModal')" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Zaxira va Sozlamalar">
+          ⚙️
+        </button>
+        <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Tungi / Kunduzgi rejim">
           <span id="themeIcon">🌙</span>
         </button>
       </div>
-    </header>
+    </div>
 
-    <!-- Progress Paneli -->
-    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200 dark:border-slate-700 mb-4">
-      <div class="flex items-center justify-between text-xs sm:text-sm mb-2 font-semibold">
-        <span class="text-slate-600 dark:text-slate-300">Kunlik natija:</span>
-        <span id="progressText" class="text-emerald-600 dark:text-emerald-400">0 / 0 (0%)</span>
+    <!-- Asosiy Navigatsiya (Tablar) -->
+    <nav class="max-w-2xl mx-auto px-2 flex overflow-x-auto space-x-1 py-1.5 no-scrollbar border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold">
+      <button onclick="switchTab('daily')" id="tabBtn-daily" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+        <span>📅</span> Kunlik
+      </button>
+      <button onclick="switchTab('weekly')" id="tabBtn-weekly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>📆</span> Haftalik
+      </button>
+      <button onclick="switchTab('monthly')" id="tabBtn-monthly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>🗓️</span> Oylik
+      </button>
+      <button onclick="switchTab('yearly')" id="tabBtn-yearly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>🎯</span> Yillik
+      </button>
+      <button onclick="switchTab('habits')" id="tabBtn-habits" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>⚡</span> Odatlar
+      </button>
+      <button onclick="switchTab('pomodoro')" id="tabBtn-pomodoro" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>⏱️</span> Pomodoro
+      </button>
+      <button onclick="switchTab('stats')" id="tabBtn-stats" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
+        <span>📊</span> Tahlil
+      </button>
+    </nav>
+  </header>
+
+  <!-- Asosiy Kontent Bo'limi -->
+  <main class="max-w-2xl w-full mx-auto p-3 sm:p-5 flex-1 flex flex-col pb-20">
+
+    <!-- ==================== 1. KUNLIK BO'LIM ==================== -->
+    <section id="view-daily" class="tab-view flex-1 flex flex-col space-y-4">
+      <!-- Sana Tanlash va Navigatsiya Bar -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <button onclick="changeDailyDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi kun">
+          ◀
+        </button>
+        <div class="text-center cursor-pointer relative" onclick="document.getElementById('datePickerInput').showPicker()">
+          <p id="dailyDateTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Bugun</p>
+          <p id="dailyDateSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium"></p>
+          <input type="date" id="datePickerInput" onchange="onDatePicked(this.value)" class="absolute opacity-0 pointer-events-none inset-0">
+        </div>
+        <div class="flex items-center gap-1">
+          <button onclick="goToday()" class="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
+            Bugun
+          </button>
+          <button onclick="changeDailyDate(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi kun">
+            ▶
+          </button>
+        </div>
       </div>
-      <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
-        <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+
+      <!-- Kunlik Natija (Progress) -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between text-xs font-semibold mb-2">
+          <span class="text-slate-600 dark:text-slate-400 flex items-center gap-1">
+            <span>📈</span> Kunlik unumdorlik:
+          </span>
+          <span id="dailyProgressText" class="text-emerald-600 dark:text-emerald-400 font-bold">0/0 (0%)</span>
+        </div>
+        <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+          <div id="dailyProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Yangi Vazifa Qo'shish Formasi -->
+      <form id="dailyForm" onsubmit="handleDailySubmit(event)" class="no-print space-y-2">
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="dailyInput" 
+            placeholder="Yangi vazifani yozing..." 
+            autocomplete="off"
+            class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs transition"
+          />
+          <button 
+            type="submit" 
+            class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-1 shadow-sm shrink-0"
+          >
+            <span>+</span> Qo'shish
+          </button>
+        </div>
+        
+        <!-- Prioritet va Kategoriya tanlash -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <span class="text-slate-400 text-[11px] shrink-0">Muhimligi:</span>
+          <select id="dailyPriority" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+            <option value="medium">🟡 O'rtacha</option>
+            <option value="high">🔴 Yuqori (Shoshilinch)</option>
+            <option value="low">🟢 Oddiy</option>
+          </select>
+          <span class="text-slate-400 text-[11px] shrink-0 ml-1">Kategoriya:</span>
+          <select id="dailyCategory" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 text-xs focus:ring-1 focus:ring-emerald-500 outline-none">
+            <option value="work">💼 Ish</option>
+            <option value="study">📚 O'qish</option>
+            <option value="personal">👤 Shaxsiy</option>
+            <option value="health">🏃 Sog'liq</option>
+          </select>
+        </div>
+      </form>
+
+      <!-- Filtrlar -->
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
+        <div class="flex gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
+          <button onclick="setDailyFilter('all')" id="filter-all" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">Hammasi</button>
+          <button onclick="setDailyFilter('active')" id="filter-active" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilmagan</button>
+          <button onclick="setDailyFilter('completed')" id="filter-completed" class="daily-filter-btn px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilgan</button>
+        </div>
+        <button onclick="clearCompletedDaily()" class="hover:text-red-500 transition py-1 text-[11px]">
+          🗑 Tozalash
+        </button>
+      </div>
+
+      <!-- Vazifalar Ro'yxati -->
+      <div id="dailyList" class="space-y-2 flex-1 min-h-[160px]">
+        <!-- JavaScript orqali to'ldiriladi -->
+      </div>
+      <div id="dailyEmpty" class="hidden text-center py-12 text-slate-400">
+        <div class="text-4xl mb-2">🌿</div>
+        <p class="font-medium text-sm">Bu kunga hech qanday vazifa qo'shilmagan</p>
+        <p class="text-xs mt-1">Yuqoridagi maydonga yozib vazifa kiriting</p>
       </div>
     </section>
 
-    <!-- Yangi vazifa kiritish formasi -->
-    <form id="todoForm" class="no-print mb-4 flex flex-col gap-2">
-      <div class="flex gap-2">
+    <!-- ==================== 2. HAFTALIK BO'LIM ==================== -->
+    <section id="view-weekly" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold">📆 Haftalik Rejalar & Sprint</h2>
+            <p id="weeklyHeaderInfo" class="text-xs text-blue-100 mt-0.5">Ushbu haftaning asosiy maqsadlari</p>
+          </div>
+          <span id="weeklyProgressBadge" class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">0%</span>
+        </div>
+      </div>
+
+      <!-- Yangi haftalik vazifa formasi -->
+      <form onsubmit="handleWeeklySubmit(event)" class="flex gap-2">
         <input 
           type="text" 
-          id="taskInput" 
-          placeholder="Yangi vazifani yozing..." 
-          autocomplete="off"
-          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-xs"
+          id="weeklyInput" 
+          placeholder="Haftalik katta maqsadni yozing..." 
+          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs transition"
         />
-        <button 
-          type="submit" 
-          class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-semibold px-5 py-3 rounded-xl text-sm transition flex items-center justify-center gap-1 shadow-sm shrink-0"
-        >
-          <span class="text-lg leading-none">+</span> Qo'shish
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          + Qo'shish
         </button>
+      </form>
+
+      <!-- Haftalik vazifalar ro'yxati -->
+      <div id="weeklyList" class="space-y-2 flex-1 min-h-[160px]"></div>
+      <div id="weeklyEmpty" class="hidden text-center py-12 text-slate-400">
+        <div class="text-4xl mb-2">🗓️</div>
+        <p class="font-medium text-sm">Bu haftaga hech qanday reja qo'yilmagan</p>
+        <p class="text-xs mt-1">Katta vazifalarni haftalik rejalarga kiritib boring</p>
       </div>
-    </form>
+    </section>
 
-    <!-- Filtrlar va vazifalar soni -->
-    <div class="no-print flex items-center justify-between text-xs mb-3 text-slate-500 dark:text-slate-400">
-      <div class="flex gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
-        <button id="filterAll" onclick="setFilter('all')" class="filter-btn px-3 py-1.5 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">Hammasi</button>
-        <button id="filterActive" onclick="setFilter('active')" class="filter-btn px-3 py-1.5 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilmagan</button>
-        <button id="filterCompleted" onclick="setFilter('completed')" class="filter-btn px-3 py-1.5 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilgan</button>
+    <!-- ==================== 3. OYLIK BO'LIM ==================== -->
+    <section id="view-monthly" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 id="monthlyTitle" class="text-lg font-bold">🗓️ Oylik Marralar</h2>
+            <p class="text-xs text-purple-100 mt-0.5">Oy davomida amalga oshirilishi shart bo'lgan ishlar</p>
+          </div>
+          <span id="monthlyProgressBadge" class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">0%</span>
+        </div>
       </div>
-      <span id="taskStats" class="font-medium text-xs">0 ta vazifa</span>
-    </div>
 
-    <!-- Vazifalar ro'yxati -->
-    <div id="todoList" class="flex-1 space-y-2.5 overflow-y-auto pr-0.5 min-h-[160px]">
-      <!-- Elementlar JavaScript orqali joylanadi -->
-    </div>
-
-    <!-- Bo'sh ro'yxat xabari -->
-    <div id="emptyState" class="hidden my-auto py-12 text-center text-slate-400 dark:text-slate-500">
-      <div class="text-4xl mb-2">✨</div>
-      <p class="font-medium text-sm">Hozircha hech qanday vazifa yo'q</p>
-      <p class="text-xs mt-1">Yangi vazifa kiritib, kuningizni samarali boshlang!</p>
-    </div>
-
-    <!-- Pastki tugmalar / Amallar paneli -->
-    <footer class="no-print pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-      <button onclick="clearCompleted()" class="hover:text-red-500 transition py-1">
-        🗑 Bajarilganlarni o'chirish
-      </button>
-      <div class="flex items-center gap-3">
-        <button onclick="exportData()" class="hover:text-slate-900 dark:hover:text-white transition py-1" title="Zaxiralash">
-          💾 Saqlash
+      <!-- Yangi oylik maqsad formasi -->
+      <form onsubmit="handleMonthlySubmit(event)" class="flex gap-2">
+        <input 
+          type="text" 
+          id="monthlyInput" 
+          placeholder="Bu oyda nimalarga erishmoqchisiz?..." 
+          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-xs transition"
+        />
+        <button type="submit" class="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          + Qo'shish
         </button>
-        <button onclick="window.print()" class="hover:text-slate-900 dark:hover:text-white transition py-1 flex items-center gap-1">
-          🖨 Chop etish
-        </button>
+      </form>
+
+      <div id="monthlyList" class="space-y-2 flex-1 min-h-[160px]"></div>
+      <div id="monthlyEmpty" class="hidden text-center py-12 text-slate-400">
+        <div class="text-4xl mb-2">🎯</div>
+        <p class="font-medium text-sm">Bu oyga hali maqsad belgilanmagan</p>
       </div>
-    </footer>
+    </section>
+
+    <!-- ==================== 4. YILLIK BO'LIM ==================== -->
+    <section id="view-yearly" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 id="yearlyTitle" class="text-lg font-bold">🎯 Yillik Strategik Maqsadlar</h2>
+            <p class="text-xs text-amber-100 mt-0.5">Yil oxirigacha erishiladigan eng muhim marralar</p>
+          </div>
+          <span id="yearlyProgressBadge" class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">0%</span>
+        </div>
+      </div>
+
+      <!-- Yangi yillik maqsad qo'shish -->
+      <form onsubmit="handleYearlySubmit(event)" class="flex gap-2">
+        <input 
+          type="text" 
+          id="yearlyInput" 
+          placeholder="Yillik katta maqsad (Masalan: Ingliz tili C1, Yangi loyiha)..." 
+          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs transition"
+        />
+        <button type="submit" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          + Qo'shish
+        </button>
+      </form>
+
+      <div id="yearlyList" class="space-y-3 flex-1 min-h-[160px]"></div>
+      <div id="yearlyEmpty" class="hidden text-center py-12 text-slate-400">
+        <div class="text-4xl mb-2">🏆</div>
+        <p class="font-medium text-sm">Yillik maqsadlar kiritilmagan</p>
+      </div>
+    </section>
+
+    <!-- ==================== 5. ODATLAR TREKERI ==================== -->
+    <section id="view-habits" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-4 shadow-sm">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <span>⚡</span> Kunlik Foydali Odatlar
+        </h2>
+        <p class="text-xs text-emerald-100 mt-0.5">Kichik kundalik odatlar katta muvaffaqiyatlarga olib keladi</p>
+      </div>
+
+      <!-- Yangi odat qo'shish -->
+      <form onsubmit="handleHabitSubmit(event)" class="flex gap-2">
+        <input 
+          type="text" 
+          id="habitInput" 
+          placeholder="Yangi odat (Masalan: Kitob o'qish, Sport, 2L suv)..." 
+          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs transition"
+        />
+        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+          + Qo'shish
+        </button>
+      </form>
+
+      <div id="habitsList" class="space-y-2.5 flex-1 min-h-[160px]"></div>
+    </section>
+
+    <!-- ==================== 6. POMODORO TAYMER ==================== -->
+    <section id="view-pomodoro" class="tab-view hidden flex-1 flex flex-col items-center justify-center py-6 text-center">
+      <div class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center">
+        <!-- Rejim almashtirish -->
+        <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-700/60 rounded-xl mb-6 text-xs font-semibold">
+          <button id="pomoMode-work" onclick="setPomodoroMode('work')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs">Fokus (25m)</button>
+          <button id="pomoMode-short" onclick="setPomodoroMode('short')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white">Tanaffus (5m)</button>
+          <button id="pomoMode-long" onclick="setPomodoroMode('long')" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white">Katta tanaffus (15m)</button>
+        </div>
+
+        <!-- Katta hisoblagich -->
+        <div class="relative w-56 h-56 flex items-center justify-center my-2">
+          <svg class="w-full h-full transform -rotate-90">
+            <circle cx="112" cy="112" r="96" stroke="currentColor" stroke-width="12" class="text-slate-100 dark:text-slate-700" fill="transparent"/>
+            <circle id="pomoCircle" cx="112" cy="112" r="96" stroke="currentColor" stroke-width="12" class="text-emerald-500 transition-all duration-300" stroke-dasharray="603" stroke-dashoffset="0" stroke-linecap="round" fill="transparent"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="pomoTimerDisplay" class="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white font-mono">25:00</span>
+            <span id="pomoStatusText" class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Diqqatni jamlang</span>
+          </div>
+        </div>
+
+        <!-- Boshqaruv tugmalari -->
+        <div class="flex items-center gap-3 mt-6">
+          <button id="pomoStartBtn" onclick="togglePomodoro()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-8 py-3 rounded-2xl text-base shadow-sm transition">
+            Boshlash
+          </button>
+          <button onclick="resetPomodoro()" class="p-3 rounded-2xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition" title="Qayta boshlash">
+            🔄
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 7. TAHLIL VA STATISTIKA ==================== -->
+    <section id="view-stats" class="tab-view hidden flex-1 flex flex-col space-y-4">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200 dark:border-slate-700">
+        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
+          <span>📊</span> Umumiy Samaradorlik Ko'rsatkichi
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+            <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400" id="statCompletedTotal">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Jami bajarilgan</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+            <p class="text-2xl font-black text-blue-600 dark:text-blue-400" id="statStreakDays">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Faol kunlar ketma-ketligi</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+            <p class="text-2xl font-black text-purple-600 dark:text-purple-400" id="statWeeklyTotal">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Haftalik maqsadlar</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+            <p class="text-2xl font-black text-amber-500" id="statYearlyTotal">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Yillik maqsadlar</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivatsion Maslahat -->
+      <div class="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4">
+        <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">💡 Bugungi tavsiya</h3>
+        <p id="motivationalQuote" class="text-sm text-slate-700 dark:text-slate-300 italic">
+          "Katta maqsadlarga har kungi kichik, ammo qat'iy intilishlar orqali erishiladi."
+        </p>
+      </div>
+    </section>
 
   </main>
 
-  <script>
-    // 1. Sana chiqarish
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('uz-UZ', dateOptions);
-    document.getElementById('todayDate').textContent = formattedDate;
+  <!-- Pastki Mobil Tezkor Navigation Bar -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 py-1.5 px-3 z-30 no-print sm:hidden flex justify-around text-[10px] font-semibold text-slate-500">
+    <button onclick="switchTab('daily')" class="flex flex-col items-center gap-0.5 py-1 px-2 text-emerald-600">
+      <span class="text-base">📅</span>
+      <span>Kunlik</span>
+    </button>
+    <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">📆</span>
+      <span>Haftalik</span>
+    </button>
+    <button onclick="switchTab('monthly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">🗓️</span>
+      <span>Oylik</span>
+    </button>
+    <button onclick="switchTab('yearly')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">🎯</span>
+      <span>Yillik</span>
+    </button>
+    <button onclick="switchTab('habits')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">⚡</span>
+      <span>Odatlar</span>
+    </button>
+    <button onclick="switchTab('pomodoro')" class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-slate-900 dark:hover:text-white">
+      <span class="text-base">⏱️</span>
+      <span>Fokus</span>
+    </button>
+  </div>
 
-    // 2. Mavzu (Dark / Light)
+  <!-- Sozlamalar va Zaxira Modali -->
+  <div id="backupModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-700 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white">⚙️ Sozlamalar va Zaxira</h3>
+        <button onclick="closeModal('backupModal')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Barcha rejalaringiz (kunlik, haftalik, oylik, yillik va odatlar) ushbu qurilma xotirasida saqlanmoqda. Boshqa qurilmaga o'tkazish uchun zaxira nusxa oling:
+      </p>
+      <div class="space-y-2 pt-2">
+        <button onclick="exportAllData()" class="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition">
+          💾 Barcha ma'lumotlarni yuklab olish (JSON)
+        </button>
+        <label class="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer text-center">
+          📂 Zaxiradan tiklash (Import)
+          <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+        </label>
+        <button onclick="window.print()" class="w-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition">
+          🖨 Chop etish (Print / PDF)
+        </button>
+      </div>
+      <div class="border-t border-slate-100 dark:border-slate-700 pt-3">
+        <button onclick="resetAllDataConfirm()" class="text-red-500 hover:text-red-600 text-xs font-medium py-1">
+          ⚠️ Hamma ma'lumotlarni tozalash
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIKA -->
+  <script>
+    /* ========================================================
+       1. GLOBAL STATE & LOCALSTORAGE
+       ======================================================== */
+    const STORAGE_KEY = 'rejapro_v3_state';
+
+    const defaultState = {
+      activeTab: 'daily',
+      selectedDate: getTodayString(),
+      daily: {},    // { '2026-10-24': [ {id, text, completed, priority, category} ] }
+      weekly: {},   // { '2026-W43': [ {id, text, completed} ] }
+      monthly: {},  // { '2026-10': [ {id, text, completed} ] }
+      yearly: {},   // { '2026': [ {id, text, completed, progress} ] }
+      habits: [
+        { id: 1, title: 'Kitob o\'qish (20 bet)', icon: '📖', completedDates: {} },
+        { id: 2, title: 'Ertalabki jismoniy mashq', icon: '🏃', completedDates: {} },
+        { id: 3, title: '2 litr suv ichish', icon: '💧', completedDates: {} },
+        { id: 4, title: 'Dasturlash yoki yangi bilim', icon: '💻', completedDates: {} }
+      ],
+      settings: { theme: 'auto' }
+    };
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return { ...defaultState, ...JSON.parse(raw) };
+      } catch (e) {}
+      // Dastlabki demo ma'lumotlar bilan to'ldirish
+      const today = getTodayString();
+      const currentWeek = getWeekString(new Date());
+      const currentMonth = getMonthString(new Date());
+      const currentYear = String(new Date().getFullYear());
+
+      const initial = JSON.parse(JSON.stringify(defaultState));
+      initial.selectedDate = today;
+      initial.daily[today] = [
+        { id: 1, text: "Ertalabki rejalarni belgilash", completed: true, priority: "high", category: "work" },
+        { id: 2, text: "Eng muhim vazifani yakunlash", completed: false, priority: "high", category: "work" },
+        { id: 3, text: "Kun yakunida hisobot yoki tahlil", completed: false, priority: "medium", category: "study" }
+      ];
+      initial.weekly[currentWeek] = [
+        { id: 101, text: "Haftalik asosiy loyihani topshirish", completed: false },
+        { id: 102, text: "Haftada 3 marta sport bilan shug'ullanish", completed: true }
+      ];
+      initial.monthly[currentMonth] = [
+        { id: 201, text: "1 ta foydali kitobni to'liq o'qib chiqish", completed: false },
+        { id: 202, text: "Oylik moliyaviy sarf-xarajatlar rejasiga rioya qilish", completed: true }
+      ];
+      initial.yearly[currentYear] = [
+        { id: 301, text: "Chet tili darajasini oshirish (IELTS / CEFR)", completed: false, progress: 40 },
+        { id: 302, text: "IT sohasida yangi mustaqil loyihani ishga tushirish", completed: false, progress: 65 }
+      ];
+      return initial;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    /* ========================================================
+       2. SANALAR BILAN ISHLASH YORDAMCHILARI
+       ======================================================== */
+    function getTodayString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getWeekString(d) {
+      const target = new Date(d.valueOf());
+      const dayNr = (d.getDay() + 6) % 7;
+      target.setDate(target.getDate() - dayNr + 3);
+      const firstThursday = target.valueOf();
+      target.setMonth(0, 1);
+      if (target.getDay() !== 4) {
+        target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+      }
+      const week = 1 + Math.ceil((firstThursday - target) / 604800000);
+      return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
+    }
+
+    function getMonthString(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    /* ========================================================
+       3. TABLARNI ALMASHTIRISH
+       ======================================================== */
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      const activeView = document.getElementById(`view-${tabName}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-50', 'dark:bg-emerald-950/60', 'text-emerald-600', 'dark:text-emerald-400');
+        btn.classList.add('text-slate-500');
+      });
+      const activeBtn = document.getElementById(`tabBtn-${tabName}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-500');
+        activeBtn.classList.add('bg-emerald-50', 'dark:bg-emerald-950/60', 'text-emerald-600', 'dark:text-emerald-400');
+      }
+
+      renderCurrentTab();
+    }
+
+    function renderCurrentTab() {
+      if (state.activeTab === 'daily') renderDaily();
+      if (state.activeTab === 'weekly') renderWeekly();
+      if (state.activeTab === 'monthly') renderMonthly();
+      if (state.activeTab === 'yearly') renderYearly();
+      if (state.activeTab === 'habits') renderHabits();
+      if (state.activeTab === 'stats') renderStats();
+    }
+
+    /* ========================================================
+       4. KUNLIK (DAILY) REJALAR LOGIKASI
+       ======================================================== */
+    let currentDailyFilter = 'all';
+
+    function changeDailyDate(offset) {
+      const parts = state.selectedDate.split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setDate(d.getDate() + offset);
+      state.selectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      saveState();
+      renderDaily();
+    }
+
+    function goToday() {
+      state.selectedDate = getTodayString();
+      saveState();
+      renderDaily();
+    }
+
+    function onDatePicked(val) {
+      if (!val) return;
+      state.selectedDate = val;
+      saveState();
+      renderDaily();
+    }
+
+    function setDailyFilter(f) {
+      currentDailyFilter = f;
+      document.querySelectorAll('.daily-filter-btn').forEach(b => {
+        b.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      });
+      document.getElementById(`filter-${f}`).classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      renderDaily();
+    }
+
+    function handleDailySubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('dailyInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const priority = document.getElementById('dailyPriority').value;
+      const category = document.getElementById('dailyCategory').value;
+
+      if (!state.daily[state.selectedDate]) {
+        state.daily[state.selectedDate] = [];
+      }
+
+      state.daily[state.selectedDate].unshift({
+        id: Date.now(),
+        text,
+        completed: false,
+        priority,
+        category
+      });
+
+      input.value = '';
+      saveState();
+      renderDaily();
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    function toggleDailyTodo(id) {
+      const list = state.daily[state.selectedDate] || [];
+      const item = list.find(t => t.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        if (item.completed) {
+          playBeep(600, 0.08);
+          if (navigator.vibrate) navigator.vibrate(35);
+        }
+      }
+      saveState();
+      renderDaily();
+      checkAllDoneConfetti();
+    }
+
+    function deleteDailyTodo(id) {
+      if (!state.daily[state.selectedDate]) return;
+      state.daily[state.selectedDate] = state.daily[state.selectedDate].filter(t => t.id !== id);
+      saveState();
+      renderDaily();
+    }
+
+    function clearCompletedDaily() {
+      const list = state.daily[state.selectedDate] || [];
+      const completed = list.filter(t => t.completed);
+      if (completed.length === 0) return;
+      if (confirm("Ushbu kundagi barcha bajarilgan vazifalar o'chirilsinmi?")) {
+        state.daily[state.selectedDate] = list.filter(t => !t.completed);
+        saveState();
+        renderDaily();
+      }
+    }
+
+    function renderDaily() {
+      const dateParts = state.selectedDate.split('-').map(Number);
+      const d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const isToday = state.selectedDate === getTodayString();
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const formatted = d.toLocaleDateString('uz-UZ', options);
+
+      document.getElementById('dailyDateTitle').textContent = isToday ? "Bugun" : formatted.split(',')[0];
+      document.getElementById('dailyDateSubtitle').textContent = formatted;
+
+      const list = state.daily[state.selectedDate] || [];
+      const total = list.length;
+      const completedCount = list.filter(t => t.completed).length;
+      const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100);
+
+      document.getElementById('dailyProgressText').textContent = `${completedCount}/${total} (${percent}%)`;
+      document.getElementById('dailyProgressBar').style.width = `${percent}%`;
+
+      let filtered = list;
+      if (currentDailyFilter === 'active') filtered = list.filter(t => !t.completed);
+      if (currentDailyFilter === 'completed') filtered = list.filter(t => t.completed);
+
+      const listEl = document.getElementById('dailyList');
+      const emptyEl = document.getElementById('dailyEmpty');
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = filtered.map(t => {
+          const priorityBadge = t.priority === 'high' 
+            ? '<span class="text-[10px] bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-400 px-1.5 py-0.5 rounded-md font-semibold">Yuqori</span>'
+            : t.priority === 'low'
+            ? '<span class="text-[10px] bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">Oddiy</span>'
+            : '';
+
+          const catIcons = { work: '💼', study: '📚', personal: '👤', health: '🏃' };
+          const catIcon = catIcons[t.category] || '📌';
+
+          return `
+            <div class="group flex items-center justify-between p-3 rounded-2xl border ${t.completed ? 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} hover:border-emerald-500/50 transition gap-3">
+              <label class="flex items-center gap-3 cursor-pointer flex-1 select-none min-w-0">
+                <input 
+                  type="checkbox" 
+                  ${t.completed ? 'checked' : ''} 
+                  onchange="toggleDailyTodo(${t.id})"
+                  class="w-5 h-5 rounded-md border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-xs opacity-75">${catIcon}</span>
+                    <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'} break-words">
+                      ${escapeHtml(t.text)}
+                    </span>
+                    ${priorityBadge}
+                  </div>
+                </div>
+              </label>
+              <button 
+                onclick="deleteDailyTodo(${t.id})" 
+                class="opacity-60 sm:opacity-0 group-hover:opacity-100 hover:text-red-500 text-slate-400 dark:text-slate-500 text-sm px-2 py-1 rounded transition no-print shrink-0"
+                title="O'chirish"
+              >
+                ✕
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    /* ========================================================
+       5. HAFTALIK (WEEKLY) REJALAR LOGIKASI
+       ======================================================== */
+    function handleWeeklySubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('weeklyInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const currentWeek = getWeekString(new Date());
+
+      if (!state.weekly[currentWeek]) state.weekly[currentWeek] = [];
+      state.weekly[currentWeek].unshift({ id: Date.now(), text, completed: false });
+      input.value = '';
+      saveState();
+      renderWeekly();
+    }
+
+    function toggleWeekly(id) {
+      const currentWeek = getWeekString(new Date());
+      const list = state.weekly[currentWeek] || [];
+      const item = list.find(t => t.id === id);
+      if (item) item.completed = !item.completed;
+      saveState();
+      renderWeekly();
+    }
+
+    function deleteWeekly(id) {
+      const currentWeek = getWeekString(new Date());
+      if (!state.weekly[currentWeek]) return;
+      state.weekly[currentWeek] = state.weekly[currentWeek].filter(t => t.id !== id);
+      saveState();
+      renderWeekly();
+    }
+
+    function renderWeekly() {
+      const currentWeek = getWeekString(new Date());
+      const list = state.weekly[currentWeek] || [];
+      const total = list.length;
+      const done = list.filter(t => t.completed).length;
+      const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      document.getElementById('weeklyProgressBadge').textContent = `${done}/${total} (${pct}%)`;
+
+      const listEl = document.getElementById('weeklyList');
+      const emptyEl = document.getElementById('weeklyEmpty');
+
+      if (list.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = list.map(t => `
+          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${t.completed ? 'bg-slate-100/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} transition gap-3">
+            <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
+              <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleWeekly(${t.id})" class="w-5 h-5 rounded text-blue-600 accent-blue-600 cursor-pointer shrink-0">
+              <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">
+                ${escapeHtml(t.text)}
+              </span>
+            </label>
+            <button onclick="deleteWeekly(${t.id})" class="text-slate-400 hover:text-red-500 text-sm px-2 py-1">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    /* ========================================================
+       6. OYLIK (MONTHLY) REJALAR LOGIKASI
+       ======================================================== */
+    function handleMonthlySubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('monthlyInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const currentMonth = getMonthString(new Date());
+
+      if (!state.monthly[currentMonth]) state.monthly[currentMonth] = [];
+      state.monthly[currentMonth].unshift({ id: Date.now(), text, completed: false });
+      input.value = '';
+      saveState();
+      renderMonthly();
+    }
+
+    function toggleMonthly(id) {
+      const currentMonth = getMonthString(new Date());
+      const list = state.monthly[currentMonth] || [];
+      const item = list.find(t => t.id === id);
+      if (item) item.completed = !item.completed;
+      saveState();
+      renderMonthly();
+    }
+
+    function deleteMonthly(id) {
+      const currentMonth = getMonthString(new Date());
+      if (!state.monthly[currentMonth]) return;
+      state.monthly[currentMonth] = state.monthly[currentMonth].filter(t => t.id !== id);
+      saveState();
+      renderMonthly();
+    }
+
+    function renderMonthly() {
+      const d = new Date();
+      const currentMonth = getMonthString(d);
+      const monthNames = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktyabr", "Noyabr", "Dekabr"];
+      document.getElementById('monthlyTitle').textContent = `🗓️ ${monthNames[d.getMonth()]} ${d.getFullYear()} — Oylik Marralar`;
+
+      const list = state.monthly[currentMonth] || [];
+      const total = list.length;
+      const done = list.filter(t => t.completed).length;
+      const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      document.getElementById('monthlyProgressBadge').textContent = `${done}/${total} (${pct}%)`;
+
+      const listEl = document.getElementById('monthlyList');
+      const emptyEl = document.getElementById('monthlyEmpty');
+
+      if (list.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = list.map(t => `
+          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${t.completed ? 'bg-slate-100/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} transition gap-3">
+            <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
+              <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleMonthly(${t.id})" class="w-5 h-5 rounded text-purple-600 accent-purple-600 cursor-pointer shrink-0">
+              <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">
+                ${escapeHtml(t.text)}
+              </span>
+            </label>
+            <button onclick="deleteMonthly(${t.id})" class="text-slate-400 hover:text-red-500 text-sm px-2 py-1">✕</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    /* ========================================================
+       7. YILLIK (YEARLY) MAQSADLAR & FOIZ SLAYDERI
+       ======================================================== */
+    function handleYearlySubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('yearlyInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const currentYear = String(new Date().getFullYear());
+
+      if (!state.yearly[currentYear]) state.yearly[currentYear] = [];
+      state.yearly[currentYear].unshift({ id: Date.now(), text, completed: false, progress: 0 });
+      input.value = '';
+      saveState();
+      renderYearly();
+    }
+
+    function updateYearlyProgress(id, val) {
+      const currentYear = String(new Date().getFullYear());
+      const list = state.yearly[currentYear] || [];
+      const item = list.find(t => t.id === id);
+      if (item) {
+        item.progress = Number(val);
+        item.completed = item.progress >= 100;
+      }
+      saveState();
+      renderYearly();
+    }
+
+    function deleteYearly(id) {
+      const currentYear = String(new Date().getFullYear());
+      if (!state.yearly[currentYear]) return;
+      state.yearly[currentYear] = state.yearly[currentYear].filter(t => t.id !== id);
+      saveState();
+      renderYearly();
+    }
+
+    function renderYearly() {
+      const currentYear = String(new Date().getFullYear());
+      document.getElementById('yearlyTitle').textContent = `🎯 ${currentYear}-yil Strategik Maqsadlari`;
+
+      const list = state.yearly[currentYear] || [];
+      const total = list.length;
+      const avgPct = total === 0 ? 0 : Math.round(list.reduce((acc, cur) => acc + (cur.progress || 0), 0) / total);
+
+      document.getElementById('yearlyProgressBadge').textContent = `O'rtacha: ${avgPct}%`;
+
+      const listEl = document.getElementById('yearlyList');
+      const emptyEl = document.getElementById('yearlyEmpty');
+
+      if (list.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = list.map(t => `
+          <div class="p-4 rounded-2xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs space-y-2">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-sm font-bold text-slate-800 dark:text-slate-100 break-words flex-1">
+                ${escapeHtml(t.text)}
+              </span>
+              <span class="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-lg">
+                ${t.progress || 0}%
+              </span>
+              <button onclick="deleteYearly(${t.id})" class="text-slate-400 hover:text-red-500 text-sm px-1">✕</button>
+            </div>
+            <div class="flex items-center gap-3">
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value="${t.progress || 0}" 
+                oninput="updateYearlyProgress(${t.id}, this.value)"
+                class="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    /* ========================================================
+       8. ODATLAR TREKERI (HABIT TRACKER)
+       ======================================================== */
+    function handleHabitSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('habitInput');
+      const text = input.value.trim();
+      if (!text) return;
+      state.habits.unshift({
+        id: Date.now(),
+        title: text,
+        icon: '⭐',
+        completedDates: {}
+      });
+      input.value = '';
+      saveState();
+      renderHabits();
+    }
+
+    function toggleHabitToday(id) {
+      const today = getTodayString();
+      const habit = state.habits.find(h => h.id === id);
+      if (habit) {
+        if (!habit.completedDates) habit.completedDates = {};
+        habit.completedDates[today] = !habit.completedDates[today];
+        if (habit.completedDates[today]) {
+          playBeep(700, 0.08);
+          if (navigator.vibrate) navigator.vibrate(40);
+        }
+      }
+      saveState();
+      renderHabits();
+    }
+
+    function deleteHabit(id) {
+      if (confirm("Bu odatni o'chirmoqchimisiz?")) {
+        state.habits = state.habits.filter(h => h.id !== id);
+        saveState();
+        renderHabits();
+      }
+    }
+
+    function renderHabits() {
+      const today = getTodayString();
+      const listEl = document.getElementById('habitsList');
+
+      // Oxirgi 5 kun sanalari
+      const last5Days = [];
+      for (let i = 4; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        last5Days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+      }
+
+      listEl.innerHTML = state.habits.map(h => {
+        const isDoneToday = h.completedDates && h.completedDates[today];
+
+        // Ketma-ketlik (Streak) hisoblash
+        let streak = 0;
+        let checkDate = new Date();
+        while (true) {
+          const ds = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+          if (h.completedDates && h.completedDates[ds]) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+
+        return `
+          <div class="p-3.5 rounded-2xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <button 
+                onclick="toggleHabitToday(${h.id})" 
+                class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg transition shrink-0 ${isDoneToday ? 'bg-emerald-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}"
+              >
+                ${isDoneToday ? '✓' : h.icon || '⭐'}
+              </button>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(h.title)}</p>
+                <p class="text-xs text-amber-500 font-semibold flex items-center gap-1">
+                  <span>🔥 ${streak} kun ketma-ket</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Oxirgi 5 kunlik mini indikatorlar -->
+            <div class="flex items-center gap-1">
+              ${last5Days.map((dStr, idx) => {
+                const done = h.completedDates && h.completedDates[dStr];
+                return `<div class="w-3.5 h-3.5 rounded-full ${done ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}" title="${dStr}"></div>`;
+              }).join('')}
+              <button onclick="deleteHabit(${h.id})" class="text-slate-400 hover:text-red-500 text-xs ml-2">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================
+       9. POMODORO TAYMER LOGIKASI
+       ======================================================== */
+    let pomoMode = 'work'; // 'work' (25m), 'short' (5m), 'long' (15m)
+    let pomoSecondsLeft = 25 * 60;
+    let pomoTotalSeconds = 25 * 60;
+    let pomoInterval = null;
+    let pomoIsRunning = false;
+
+    function setPomodoroMode(mode) {
+      pomoMode = mode;
+      clearInterval(pomoInterval);
+      pomoIsRunning = false;
+      document.getElementById('pomoStartBtn').textContent = "Boshlash";
+
+      if (mode === 'work') pomoTotalSeconds = 25 * 60;
+      if (mode === 'short') pomoTotalSeconds = 5 * 60;
+      if (mode === 'long') pomoTotalSeconds = 15 * 60;
+      pomoSecondsLeft = pomoTotalSeconds;
+
+      document.querySelectorAll('#view-pomodoro button[id^="pomoMode-"]').forEach(btn => {
+        btn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+        btn.classList.add('text-slate-500');
+      });
+      document.getElementById(`pomoMode-${mode}`).classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      document.getElementById(`pomoMode-${mode}`).classList.remove('text-slate-500');
+
+      updatePomoDisplay();
+    }
+
+    function togglePomodoro() {
+      if (pomoIsRunning) {
+        clearInterval(pomoInterval);
+        pomoIsRunning = false;
+        document.getElementById('pomoStartBtn').textContent = "Davom ettirish";
+      } else {
+        pomoIsRunning = true;
+        document.getElementById('pomoStartBtn').textContent = "Pauza";
+        pomoInterval = setInterval(() => {
+          if (pomoSecondsLeft > 0) {
+            pomoSecondsLeft--;
+            updatePomoDisplay();
+          } else {
+            clearInterval(pomoInterval);
+            pomoIsRunning = false;
+            document.getElementById('pomoStartBtn').textContent = "Boshlash";
+            playBeep(880, 0.4);
+            setTimeout(() => playBeep(1100, 0.5), 500);
+            alert("⏰ Vaqt yakunlandi! Ajoyib natija!");
+            setPomodoroMode(pomoMode === 'work' ? 'short' : 'work');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetPomodoro() {
+      setPomodoroMode(pomoMode);
+    }
+
+    function updatePomoDisplay() {
+      const mins = Math.floor(pomoSecondsLeft / 60);
+      const secs = pomoSecondsLeft % 60;
+      const str = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      document.getElementById('pomoTimerDisplay').textContent = str;
+
+      const circle = document.getElementById('pomoCircle');
+      const circumference = 2 * Math.PI * 96; // ~603
+      const progress = (pomoTotalSeconds - pomoSecondsLeft) / pomoTotalSeconds;
+      const offset = circumference * (1 - progress);
+      circle.style.strokeDashoffset = offset;
+    }
+
+    /* ========================================================
+       10. STATISTIKA VA TAHLIL
+       ======================================================== */
+    function renderStats() {
+      // Jami bajarilgan kunlik vazifalar
+      let totalCompleted = 0;
+      Object.values(state.daily).forEach(list => {
+        totalCompleted += list.filter(t => t.completed).length;
+      });
+      document.getElementById('statCompletedTotal').textContent = totalCompleted;
+
+      // Haftalik maqsadlar
+      let totalWeekly = 0;
+      Object.values(state.weekly).forEach(list => {
+        totalWeekly += list.filter(t => t.completed).length;
+      });
+      document.getElementById('statWeeklyTotal').textContent = totalWeekly;
+
+      // Yillik maqsadlar
+      let totalYearly = 0;
+      Object.values(state.yearly).forEach(list => {
+        totalYearly += list.filter(t => t.completed || t.progress >= 100).length;
+      });
+      document.getElementById('statYearlyTotal').textContent = totalYearly;
+
+      // Odatlar bo'yicha ketma-ketlik
+      let maxStreak = 0;
+      state.habits.forEach(h => {
+        let streak = 0;
+        let cur = new Date();
+        while (true) {
+          const ds = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+          if (h.completedDates && h.completedDates[ds]) {
+            streak++;
+            cur.setDate(cur.getDate() - 1);
+          } else break;
+        }
+        if (streak > maxStreak) maxStreak = streak;
+      });
+      document.getElementById('statStreakDays').textContent = `${maxStreak} kun`;
+
+      const quotes = [
+        "\"Katta maqsadlarga har kungi kichik, ammo qat'iy intilishlar orqali erishiladi.\"",
+        "\"Intizom — bu o'zing xohlagan narsa bilan, hozir xohlayotgan narsa o'rtasidagi tanlovdir.\"",
+        "\"Muvaffaqiyat — bu har kuni takrorlanadigan to'g'ri odatlarning jamlanmasidir.\"",
+        "\"Eng yaxshi vaqt — aynan hozirgi vaqt!\""
+      ];
+      document.getElementById('motivationalQuote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+    }
+
+    /* ========================================================
+       11. OVOZ VA CONFETTI EFFEKTLARI
+       ======================================================== */
+    function playBeep(freq = 600, duration = 0.1) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function checkAllDoneConfetti() {
+      const list = state.daily[state.selectedDate] || [];
+      if (list.length > 0 && list.every(t => t.completed)) {
+        triggerConfetti();
+      }
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.5) * 12 - 4,
+          gravity: 0.3,
+          alpha: 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha -= 0.015;
+          if (p.alpha > 0) {
+            active = true;
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+        if (active) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      animate();
+    }
+
+    /* ========================================================
+       12. ZAXIRALASH VA TIKLASH (EXPORT / IMPORT)
+       ======================================================== */
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function exportAllData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `rejapro_zaxira_${getTodayString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (parsed && typeof parsed === 'object') {
+            state = { ...defaultState, ...parsed };
+            saveState();
+            renderCurrentTab();
+            closeModal('backupModal');
+            alert("✅ Barcha ma'lumotlar muvaffaqiyatli tiklandi!");
+          }
+        } catch (err) {
+          alert("❌ Faylni o'qishda xatolik yuz berdi. To'g'ri JSON fayl tanlang.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllDataConfirm() {
+      if (confirm("Diqqat! Barcha vazifalar, odatlar va maqsadlaringiz o'chib ketadi. Rozimisiz?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        state = loadState();
+        saveState();
+        renderCurrentTab();
+        closeModal('backupModal');
+        alert("Ma'lumotlar tozalandi.");
+      }
+    }
+
+    /* ========================================================
+       13. MAVZU (THEME) VA UTILLAR
+       ======================================================== */
     function initTheme() {
       const isDark = localStorage.getItem('theme') === 'dark' || 
         (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -154,163 +1311,16 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
     }
-    initTheme();
-
-    // 3. Vazifalar xotirasi (LocalStorage)
-    const STORAGE_KEY = 'kunlik_reja_v2';
-    let todos = [];
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        todos = JSON.parse(saved);
-      } else {
-        todos = [
-          { id: 1, text: "Ertalabki rejalarni belgilash", completed: true },
-          { id: 2, text: "Asosiy muhim topshiriqni yakunlash", completed: false },
-          { id: 3, text: "Kunlik natijalarni tekshirish", completed: false }
-        ];
-        saveTodos();
-      }
-    } catch (e) {
-      todos = [];
-    }
-
-    let currentFilter = 'all';
-
-    function saveTodos() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-      } catch (e) {}
-      render();
-    }
-
-    function addTodo(text) {
-      const trimmed = text.trim();
-      if (!trimmed) return;
-      todos.unshift({
-        id: Date.now(),
-        text: trimmed,
-        completed: false
-      });
-      saveTodos();
-      if (navigator.vibrate) navigator.vibrate(20);
-    }
-
-    function toggleTodo(id) {
-      todos = todos.map(t => {
-        if (t.id === id) {
-          const newState = !t.completed;
-          if (newState && navigator.vibrate) navigator.vibrate(35);
-          return { ...t, completed: newState };
-        }
-        return t;
-      });
-      saveTodos();
-    }
-
-    function deleteTodo(id) {
-      todos = todos.filter(t => t.id !== id);
-      saveTodos();
-    }
-
-    function clearCompleted() {
-      const completedCount = todos.filter(t => t.completed).length;
-      if (completedCount === 0) return;
-      if (confirm("Bajarilgan barcha vazifalarni o'chirmoqchimisiz?")) {
-        todos = todos.filter(t => !t.completed);
-        saveTodos();
-      }
-    }
-
-    function setFilter(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
-      });
-      if (filter === 'all') document.getElementById('filterAll').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
-      if (filter === 'active') document.getElementById('filterActive').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
-      if (filter === 'completed') document.getElementById('filterCompleted').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
-      render();
-    }
-
-    function render() {
-      const listEl = document.getElementById('todoList');
-      const emptyEl = document.getElementById('emptyState');
-      const statsEl = document.getElementById('taskStats');
-      const progressText = document.getElementById('progressText');
-      const progressBar = document.getElementById('progressBar');
-
-      const total = todos.length;
-      const completedCount = todos.filter(t => t.completed).length;
-      const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100);
-
-      progressText.textContent = `${completedCount} / ${total} (${percent}%)`;
-      progressBar.style.width = `${percent}%`;
-      statsEl.textContent = `${completedCount}/${total} bajarildi`;
-
-      let filtered = todos;
-      if (currentFilter === 'active') filtered = todos.filter(t => !t.completed);
-      if (currentFilter === 'completed') filtered = todos.filter(t => t.completed);
-
-      if (filtered.length === 0) {
-        listEl.innerHTML = '';
-        emptyEl.classList.remove('hidden');
-      } else {
-        emptyEl.classList.add('hidden');
-        listEl.innerHTML = filtered.map(t => `
-          <div class="group flex items-center justify-between p-3.5 rounded-2xl border ${t.completed ? 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} hover:border-emerald-500/50 transition gap-3">
-            <label class="flex items-center gap-3.5 cursor-pointer flex-1 select-none min-w-0">
-              <input 
-                type="checkbox" 
-                ${t.completed ? 'checked' : ''} 
-                onchange="toggleTodo(${t.id})"
-                class="w-5 h-5 rounded-md border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
-              />
-              <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'} break-words">
-                ${escapeHtml(t.text)}
-              </span>
-            </label>
-            <button 
-              onclick="deleteTodo(${t.id})" 
-              class="opacity-60 sm:opacity-0 group-hover:opacity-100 hover:text-red-500 text-slate-400 dark:text-slate-500 text-sm px-2 py-1 rounded transition no-print shrink-0"
-              title="O'chirish"
-            >
-              ✕
-            </button>
-          </div>
-        `).join('');
-      }
-    }
 
     function escapeHtml(str) {
+      if (!str) return '';
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(todos, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `vazifalar_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    document.getElementById('todoForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('taskInput');
-      addTodo(input.value);
-      input.value = '';
-    });
-
-    // PWA Service Worker ro'yxatdan o'tkazish
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
-    }
-
-    render();
+    // Dastur ishga tushishi
+    initTheme();
+    updatePomoDisplay();
+    switchTab('daily');
   </script>
 </body>
 </html>

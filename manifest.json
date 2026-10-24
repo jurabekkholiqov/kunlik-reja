@@ -1,7 +1,7 @@
 {
-  "name": "Kunlik Reja",
-  "short_name": "Reja",
-  "description": "Sodda va qulay kunlik vazifalar checklisti",
+  "name": "RejaPro — Hayot Rejalari & Samaradorlik",
+  "short_name": "RejaPro",
+  "description": "Kunlik vazifalar, haftalik, oylik va yillik maqsadlar, odatlar trekeri va Pomodoro taymer",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
