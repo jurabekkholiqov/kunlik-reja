@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kunlik Reja — Vazifalar & Checklist</title>
+  <meta name="description" content="Sodda va qulay kunlik vazifalar ro'yxati">
+  <meta name="theme-color" content="#10b981">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Mobile-optimized touch styling */
+    * { -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    @media print {
+      body { background: white !important; color: black !important; }
+      .no-print { display: none !important; }
+      .card-box { border: 1px solid #ccc !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col justify-between">
+
+  <!-- Asosiy Konteyner -->
+  <main class="w-full max-w-lg mx-auto p-4 sm:p-6 flex-1 flex flex-col">
+    
+    <!-- Yuqori panel: Sarlavha, Sana va Mavzu tugmasi -->
+    <header class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 dark:border-slate-800">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+          <span class="text-2xl">📋</span> Kunlik Reja
+        </h1>
+        <p id="todayDate" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5 capitalize"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Mavzu (Dark/Light) almashtirish -->
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Mavzuni o'zgartirish">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress Paneli -->
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-slate-200 dark:border-slate-700 mb-4">
+      <div class="flex items-center justify-between text-xs sm:text-sm mb-2 font-semibold">
+        <span class="text-slate-600 dark:text-slate-300">Kunlik natija:</span>
+        <span id="progressText" class="text-emerald-600 dark:text-emerald-400">0 / 0 (0%)</span>
+      </div>
+      <div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+        <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </section>
+
+    <!-- Yangi vazifa kiritish formasi -->
+    <form id="todoForm" class="no-print mb-4 flex flex-col gap-2">
+      <div class="flex gap-2">
+        <input 
+          type="text" 
+          id="taskInput" 
+          placeholder="Yangi vazifani yozing..." 
+          autocomplete="off"
+          class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition shadow-xs"
+        />
+        <button 
+          type="submit" 
+          class="bg-emerald-600 active:scale-95 hover:bg-emerald-700 text-white font-semibold px-5 py-3 rounded-xl text-sm transition flex items-center justify-center gap-1 shadow-sm shrink-0"
+        >
+          <span class="text-lg leading-none">+</span> Qo'shish
+        </button>
+      </div>
+    </form>
+
+    <!-- Filtrlar va vazifalar soni -->
+    <div class="no-print flex items-center justify-between text-xs mb-3 text-slate-500 dark:text-slate-400">
+      <div class="flex gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
+        <button id="filterAll" onclick="setFilter('all')" class="filter-btn px-3 py-1.5 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">Hammasi</button>
+        <button id="filterActive" onclick="setFilter('active')" class="filter-btn px-3 py-1.5 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilmagan</button>
+        <button id="filterCompleted" onclick="setFilter('completed')" class="filter-btn px-3 py-1.5 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Bajarilgan</button>
+      </div>
+      <span id="taskStats" class="font-medium text-xs">0 ta vazifa</span>
+    </div>
+
+    <!-- Vazifalar ro'yxati -->
+    <div id="todoList" class="flex-1 space-y-2.5 overflow-y-auto pr-0.5 min-h-[160px]">
+      <!-- Elementlar JavaScript orqali joylanadi -->
+    </div>
+
+    <!-- Bo'sh ro'yxat xabari -->
+    <div id="emptyState" class="hidden my-auto py-12 text-center text-slate-400 dark:text-slate-500">
+      <div class="text-4xl mb-2">✨</div>
+      <p class="font-medium text-sm">Hozircha hech qanday vazifa yo'q</p>
+      <p class="text-xs mt-1">Yangi vazifa kiritib, kuningizni samarali boshlang!</p>
+    </div>
+
+    <!-- Pastki tugmalar / Amallar paneli -->
+    <footer class="no-print pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+      <button onclick="clearCompleted()" class="hover:text-red-500 transition py-1">
+        🗑 Bajarilganlarni o'chirish
+      </button>
+      <div class="flex items-center gap-3">
+        <button onclick="exportData()" class="hover:text-slate-900 dark:hover:text-white transition py-1" title="Zaxiralash">
+          💾 Saqlash
+        </button>
+        <button onclick="window.print()" class="hover:text-slate-900 dark:hover:text-white transition py-1 flex items-center gap-1">
+          🖨 Chop etish
+        </button>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // 1. Sana chiqarish
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('uz-UZ', dateOptions);
+    document.getElementById('todayDate').textContent = formattedDate;
+
+    // 2. Mavzu (Dark / Light)
+    function initTheme() {
+      const isDark = localStorage.getItem('theme') === 'dark' || 
+        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').textContent = '🌙';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+    }
+    initTheme();
+
+    // 3. Vazifalar xotirasi (LocalStorage)
+    const STORAGE_KEY = 'kunlik_reja_v2';
+    let todos = [];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        todos = JSON.parse(saved);
+      } else {
+        todos = [
+          { id: 1, text: "Ertalabki rejalarni belgilash", completed: true },
+          { id: 2, text: "Asosiy muhim topshiriqni yakunlash", completed: false },
+          { id: 3, text: "Kunlik natijalarni tekshirish", completed: false }
+        ];
+        saveTodos();
+      }
+    } catch (e) {
+      todos = [];
+    }
+
+    let currentFilter = 'all';
+
+    function saveTodos() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+      } catch (e) {}
+      render();
+    }
+
+    function addTodo(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      todos.unshift({
+        id: Date.now(),
+        text: trimmed,
+        completed: false
+      });
+      saveTodos();
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    function toggleTodo(id) {
+      todos = todos.map(t => {
+        if (t.id === id) {
+          const newState = !t.completed;
+          if (newState && navigator.vibrate) navigator.vibrate(35);
+          return { ...t, completed: newState };
+        }
+        return t;
+      });
+      saveTodos();
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter(t => t.id !== id);
+      saveTodos();
+    }
+
+    function clearCompleted() {
+      const completedCount = todos.filter(t => t.completed).length;
+      if (completedCount === 0) return;
+      if (confirm("Bajarilgan barcha vazifalarni o'chirmoqchimisiz?")) {
+        todos = todos.filter(t => !t.completed);
+        saveTodos();
+      }
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      });
+      if (filter === 'all') document.getElementById('filterAll').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      if (filter === 'active') document.getElementById('filterActive').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      if (filter === 'completed') document.getElementById('filterCompleted').classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+      render();
+    }
+
+    function render() {
+      const listEl = document.getElementById('todoList');
+      const emptyEl = document.getElementById('emptyState');
+      const statsEl = document.getElementById('taskStats');
+      const progressText = document.getElementById('progressText');
+      const progressBar = document.getElementById('progressBar');
+
+      const total = todos.length;
+      const completedCount = todos.filter(t => t.completed).length;
+      const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100);
+
+      progressText.textContent = `${completedCount} / ${total} (${percent}%)`;
+      progressBar.style.width = `${percent}%`;
+      statsEl.textContent = `${completedCount}/${total} bajarildi`;
+
+      let filtered = todos;
+      if (currentFilter === 'active') filtered = todos.filter(t => !t.completed);
+      if (currentFilter === 'completed') filtered = todos.filter(t => t.completed);
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = filtered.map(t => `
+          <div class="group flex items-center justify-between p-3.5 rounded-2xl border ${t.completed ? 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} hover:border-emerald-500/50 transition gap-3">
+            <label class="flex items-center gap-3.5 cursor-pointer flex-1 select-none min-w-0">
+              <input 
+                type="checkbox" 
+                ${t.completed ? 'checked' : ''} 
+                onchange="toggleTodo(${t.id})"
+                class="w-5 h-5 rounded-md border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+              />
+              <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'} break-words">
+                ${escapeHtml(t.text)}
+              </span>
+            </label>
+            <button 
+              onclick="deleteTodo(${t.id})" 
+              class="opacity-60 sm:opacity-0 group-hover:opacity-100 hover:text-red-500 text-slate-400 dark:text-slate-500 text-sm px-2 py-1 rounded transition no-print shrink-0"
+              title="O'chirish"
+            >
+              ✕
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(todos, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `vazifalar_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    document.getElementById('todoForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('taskInput');
+      addTodo(input.value);
+      input.value = '';
+    });
+
+    // PWA Service Worker ro'yxatdan o'tkazish
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>

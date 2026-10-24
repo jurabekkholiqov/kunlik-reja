@@ -1,0 +1,16 @@
+{
+  "name": "Kunlik Reja",
+  "short_name": "Reja",
+  "description": "Sodda va qulay kunlik vazifalar checklisti",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
