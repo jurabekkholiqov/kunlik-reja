@@ -33,9 +33,22 @@
     * { -webkit-tap-highlight-color: transparent; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.5); }
+    
+    /* Scrollbar to'liq yashirish utility */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+
     @media print {
       body { background: white !important; color: black !important; }
       .no-print { display: none !important; }
@@ -49,8 +62,8 @@
   <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
 
   <!-- Yuqori Asosiy Header -->
-  <header class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
-    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+  <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-2xs">
+    <div class="max-w-4xl mx-auto px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-bold text-lg shadow-sm">
           ✓
@@ -62,11 +75,11 @@
       </div>
       
       <!-- O'ng tomondagi tugmalar -->
-      <div class="flex items-center gap-1.5">
-        <button onclick="openSearchModal()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Tezkor Qidiruv (Ctrl+K)">
+      <div class="flex items-center gap-1 sm:gap-1.5">
+        <button onclick="openSearchModal()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tezkor Qidiruv (Ctrl+K)">
           <span>🔍</span>
         </button>
-        <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
+        <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
           <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="hidden sm:inline">Sinxron</span>
           <span id="syncStatusIcon">☁️</span>
@@ -74,73 +87,89 @@
         <button id="headerInstallBtn" onclick="triggerAppInstall()" class="text-xs bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition">
           <span>📲</span> <span class="hidden sm:inline">Ilovani</span> O'rnatish
         </button>
-        <button onclick="openModal('backupModal')" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Zaxira va Sozlamalar">
+        <button onclick="openModal('backupModal')" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Zaxira va Sozlamalar">
           ⚙️
         </button>
-        <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Tungi / Kunduzgi rejim">
+        <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tungi / Kunduzgi rejim">
           <span id="themeIcon">🌙</span>
         </button>
       </div>
     </div>
 
-    <!-- Asosiy Navigatsiya (Tablar) -->
-    <nav class="max-w-2xl mx-auto px-2 flex overflow-x-auto space-x-1 py-1.5 no-scrollbar border-t border-slate-100 dark:border-slate-800/60 text-xs font-semibold">
-      <button onclick="switchTab('daily')" id="tabBtn-daily" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-        <span>📅</span> Kunlik
-      </button>
-      <button onclick="switchTab('weekly')" id="tabBtn-weekly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>📆</span> Haftalik
-      </button>
-      <button onclick="switchTab('monthly')" id="tabBtn-monthly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>🗓️</span> Oylik
-      </button>
-      <button onclick="switchTab('yearly')" id="tabBtn-yearly" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>🎯</span> Yillik
-      </button>
-      <button onclick="switchTab('habits')" id="tabBtn-habits" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>⚡</span> Odatlar
-      </button>
-      <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>📌</span> Eslatmalar
-      </button>
-      <button onclick="switchTab('finance')" id="tabBtn-finance" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>💰</span> Moliya
-      </button>
-      <button onclick="switchTab('journal')" id="tabBtn-journal" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>📝</span> Xulosalar
-      </button>
-      <button onclick="switchTab('pomodoro')" id="tabBtn-pomodoro" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>⏱️</span> Pomodoro
-      </button>
-      <button onclick="switchTab('stats')" id="tabBtn-stats" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shrink-0 transition text-slate-500 hover:text-slate-900 dark:hover:text-white">
-        <span>📊</span> Tahlil
-      </button>
+    <!-- Asosiy Tartibli Navigatsiya (2 ta toza guruh) -->
+    <nav class="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/60 px-2 sm:px-4 py-2">
+      <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
+        
+        <!-- 1-Guruh: Rejalar (Vaqt bo'yicha) -->
+        <div class="flex items-center bg-white dark:bg-slate-800/90 p-1 rounded-xl shadow-xs border border-slate-200/80 dark:border-slate-700/60 gap-0.5 justify-between md:justify-start">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 hidden lg:inline select-none">Rejalar</span>
+          <button onclick="switchTab('daily')" id="tabBtn-daily" class="tab-btn flex-1 md:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <span>📅</span> <span>Kunlik</span>
+          </button>
+          <button onclick="switchTab('weekly')" id="tabBtn-weekly" class="tab-btn flex-1 md:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <span>📆</span> <span>Haftalik</span>
+          </button>
+          <button onclick="switchTab('monthly')" id="tabBtn-monthly" class="tab-btn flex-1 md:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <span>🗓️</span> <span>Oylik</span>
+          </button>
+          <button onclick="switchTab('yearly')" id="tabBtn-yearly" class="tab-btn flex-1 md:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <span>🎯</span> <span>Yillik</span>
+          </button>
+        </div>
+
+        <!-- 2-Guruh: Asboblar & Moliya -->
+        <div class="flex items-center bg-white dark:bg-slate-800/90 p-1 rounded-xl shadow-xs border border-slate-200/80 dark:border-slate-700/60 gap-0.5 overflow-x-auto no-scrollbar">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 hidden lg:inline select-none">Asboblar</span>
+          <button onclick="switchTab('finance')" id="tabBtn-finance" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>💰</span> <span>Moliya</span>
+          </button>
+          <button onclick="switchTab('habits')" id="tabBtn-habits" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>⚡</span> <span>Odatlar</span>
+          </button>
+          <button onclick="switchTab('notes')" id="tabBtn-notes" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>📌</span> <span>Eslatmalar</span>
+          </button>
+          <button onclick="switchTab('pomodoro')" id="tabBtn-pomodoro" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>⏱️</span> <span>Pomodoro</span>
+          </button>
+          <button onclick="switchTab('journal')" id="tabBtn-journal" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>📝</span> <span>Xulosalar</span>
+          </button>
+          <button onclick="switchTab('stats')" id="tabBtn-stats" class="tab-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 transition">
+            <span>📊</span> <span>Tahlil</span>
+          </button>
+        </div>
+
+      </div>
     </nav>
   </header>
 
   <!-- Asosiy Kontent Bo'limi -->
-  <main class="max-w-2xl w-full mx-auto p-3 sm:p-5 flex-1 flex flex-col pb-20">
+  <main class="max-w-4xl w-full mx-auto p-3 sm:p-5 flex-1 flex flex-col pb-20">
 
     <!-- ==================== 1. KUNLIK BO'LIM ==================== -->
     <section id="view-daily" class="tab-view flex-1 flex flex-col space-y-4">
       <!-- Sana Tanlash va Navigatsiya Bar -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <button onclick="changeDailyDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi kun">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-1 sm:gap-2">
+        <button onclick="changeDailyDate(-1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Oldingi kun">
           ◀
         </button>
-        <div class="text-center cursor-pointer relative" onclick="document.getElementById('datePickerInput').showPicker()">
-          <p id="dailyDateTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Bugun</p>
-          <p id="dailyDateSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium"></p>
+        <div class="text-center cursor-pointer select-none flex-1 px-1 relative" onclick="document.getElementById('datePickerInput').showPicker()" title="Sanani tanlash">
+          <div class="flex items-center justify-center gap-1.5">
+            <span id="dailyDateTitle" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white capitalize leading-tight">Bugun</span>
+            <span id="dailyTodayBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold">Joriy kun</span>
+          </div>
+          <p id="dailyDateSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5"></p>
           <input type="date" id="datePickerInput" onchange="onDatePicked(this.value)" class="absolute opacity-0 pointer-events-none inset-0">
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="goToday()" class="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
-            Bugun
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <button id="dailyResetBtn" onclick="goToday()" class="hidden text-xs px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition active:scale-95" title="Bugungi kunga qaytish">
+            ↺ Bugun
           </button>
-          <button onclick="toggleCalendarView()" id="calToggleBtn" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1 transition" title="Oylik Kalendarni ochish">
+          <button onclick="toggleCalendarView()" id="calToggleBtn" class="text-xs px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1 transition" title="Oylik Kalendarni ochish">
             <span>📅</span> <span class="hidden sm:inline">Kalendar</span>
           </button>
-          <button onclick="changeDailyDate(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi kun">
+          <button onclick="changeDailyDate(1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Keyingi kun">
             ▶
           </button>
         </div>
@@ -278,19 +307,22 @@
       </div>
 
       <!-- Hafta Tanlash va Navigatsiya Bar -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <button onclick="changeWeeklyWeek(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi hafta">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-1 sm:gap-2">
+        <button onclick="changeWeeklyWeek(-1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Oldingi hafta">
           ◀
         </button>
-        <div class="text-center cursor-pointer" onclick="goCurrentWeek()">
-          <p id="weeklyWeekTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">45-hafta (Joriy)</p>
-          <p id="weeklyWeekSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">2 - 8 Noyabr, 2026</p>
+        <div class="text-center cursor-pointer select-none flex-1 px-1" onclick="goCurrentWeek()" title="Joriy haftaga o'tish">
+          <div class="flex items-center justify-center gap-1.5">
+            <span id="weeklyWeekTitle" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white capitalize leading-tight">45-hafta</span>
+            <span id="weeklyCurrentBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 font-bold">Joriy</span>
+          </div>
+          <p id="weeklyWeekSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">2 - 8 Noyabr, 2026</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="goCurrentWeek()" class="text-xs px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-100 transition">
-            Joriy hafta
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <button id="weeklyResetBtn" onclick="goCurrentWeek()" class="hidden text-xs px-2.5 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-100 transition active:scale-95" title="Joriy haftaga qaytish">
+            ↺ Joriy
           </button>
-          <button onclick="changeWeeklyWeek(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi hafta">
+          <button onclick="changeWeeklyWeek(1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Keyingi hafta">
             ▶
           </button>
         </div>
@@ -331,19 +363,22 @@
       </div>
 
       <!-- Oy Tanlash va Navigatsiya Bar -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <button onclick="changeMonthlyMonth(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi oy">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-1 sm:gap-2">
+        <button onclick="changeMonthlyMonth(-1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Oldingi oy">
           ◀
         </button>
-        <div class="text-center cursor-pointer" onclick="goCurrentMonth()">
-          <p id="monthlyMonthTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Noyabr 2026</p>
-          <p id="monthlyMonthSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Oylik marralar rejasi</p>
+        <div class="text-center cursor-pointer select-none flex-1 px-1" onclick="goCurrentMonth()" title="Joriy oyga o'tish">
+          <div class="flex items-center justify-center gap-1.5">
+            <span id="monthlyMonthTitle" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white capitalize leading-tight">Noyabr 2026</span>
+            <span id="monthlyCurrentBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold">Joriy</span>
+          </div>
+          <p id="monthlyMonthSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Oylik marralar rejasi</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="goCurrentMonth()" class="text-xs px-2.5 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-semibold hover:bg-purple-100 transition">
-            Joriy oy
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <button id="monthlyResetBtn" onclick="goCurrentMonth()" class="hidden text-xs px-2.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-semibold hover:bg-purple-100 transition active:scale-95" title="Joriy oyga qaytish">
+            ↺ Joriy
           </button>
-          <button onclick="changeMonthlyMonth(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi oy">
+          <button onclick="changeMonthlyMonth(1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Keyingi oy">
             ▶
           </button>
         </div>
@@ -507,19 +542,22 @@
       </div>
 
       <!-- Davr Navigatsiyasi (Oy, Hafta yoki Kun bo'yicha siljish) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <button onclick="changeFinancePeriodDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi davr">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xs border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-1 sm:gap-2">
+        <button onclick="changeFinancePeriodDate(-1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Oldingi davr">
           ◀
         </button>
-        <div class="text-center cursor-pointer" onclick="goFinancePeriodCurrent()">
-          <p id="financePeriodTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Oktyabr 2026</p>
-          <p id="financePeriodSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Barcha xarajat va daromadlar</p>
+        <div class="text-center cursor-pointer select-none flex-1 px-1" onclick="goFinancePeriodCurrent()" title="Joriy davrga o'tish">
+          <div class="flex items-center justify-center gap-1.5">
+            <span id="financePeriodTitle" class="text-sm sm:text-base font-bold text-slate-900 dark:text-white capitalize leading-tight">Noyabr 2026</span>
+            <span id="financeCurrentBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold">Joriy</span>
+          </div>
+          <p id="financePeriodSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Barcha xarajat va daromadlar</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="goFinancePeriodCurrent()" id="financePeriodCurrentBtn" class="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
-            Joriy oy
+        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <button onclick="goFinancePeriodCurrent()" id="financePeriodCurrentBtn" class="hidden text-xs px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition active:scale-95" title="Joriy davrga qaytish">
+            ↺ Joriy
           </button>
-          <button onclick="changeFinancePeriodDate(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi davr">
+          <button onclick="changeFinancePeriodDate(1)" class="w-9 h-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 shrink-0" title="Keyingi davr">
             ▶
           </button>
         </div>
@@ -681,38 +719,38 @@
   </main>
 
   <!-- Pastki Mobil Tezkor Navigation Bar -->
-  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 py-1.5 px-2 z-30 no-print sm:hidden flex justify-around text-[9px] font-semibold text-slate-500 overflow-x-auto no-scrollbar">
-    <button onclick="switchTab('daily')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 text-emerald-600 shrink-0">
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 py-1.5 px-1 z-30 no-print sm:hidden flex justify-around text-[9px] font-semibold text-slate-500 overflow-x-auto no-scrollbar shadow-lg">
+    <button onclick="switchTab('daily')" id="bottomTabBtn-daily" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 transition">
       <span class="text-base">📅</span>
       <span>Kunlik</span>
     </button>
-    <button onclick="switchTab('weekly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
+    <button onclick="switchTab('weekly')" id="bottomTabBtn-weekly" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
       <span class="text-base">📆</span>
       <span>Haftalik</span>
     </button>
-    <button onclick="switchTab('monthly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
+    <button onclick="switchTab('monthly')" id="bottomTabBtn-monthly" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
       <span class="text-base">🗓️</span>
       <span>Oylik</span>
     </button>
-    <button onclick="switchTab('yearly')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
-      <span class="text-base">🎯</span>
-      <span>Yillik</span>
-    </button>
-    <button onclick="switchTab('habits')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
-      <span class="text-base">⚡</span>
-      <span>Odatlar</span>
-    </button>
-    <button onclick="switchTab('notes')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
-      <span class="text-base">📌</span>
-      <span>Eslatma</span>
-    </button>
-    <button onclick="switchTab('finance')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
+    <button onclick="switchTab('finance')" id="bottomTabBtn-finance" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
       <span class="text-base">💰</span>
       <span>Moliya</span>
     </button>
-    <button onclick="switchTab('pomodoro')" class="flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0">
+    <button onclick="switchTab('habits')" id="bottomTabBtn-habits" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
+      <span class="text-base">⚡</span>
+      <span>Odatlar</span>
+    </button>
+    <button onclick="switchTab('notes')" id="bottomTabBtn-notes" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
+      <span class="text-base">📌</span>
+      <span>Eslatma</span>
+    </button>
+    <button onclick="switchTab('pomodoro')" id="bottomTabBtn-pomodoro" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
       <span class="text-base">⏱️</span>
       <span>Fokus</span>
+    </button>
+    <button onclick="switchTab('stats')" id="bottomTabBtn-stats" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
+      <span class="text-base">📊</span>
+      <span>Tahlil</span>
     </button>
   </div>
 
@@ -1050,8 +1088,50 @@
     }
 
     /* ========================================================
-       2. SANALAR BILAN ISHLASH YORDAMCHILARI
+       2. SANALAR BILAN ISHLASH YORDAMCHILARI (UZBEK TILIDA TO'G'RI)
        ======================================================== */
+    const UZ_MONTHS = [
+      'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+      'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'
+    ];
+    const UZ_WEEKDAYS = [
+      'Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'
+    ];
+
+    function formatUzWeekRange(start, end) {
+      const s = new Date(start);
+      const e = new Date(end);
+      const sDay = s.getDate();
+      const eDay = e.getDate();
+      const sMonth = UZ_MONTHS[s.getMonth()];
+      const eMonth = UZ_MONTHS[e.getMonth()];
+      const year = e.getFullYear();
+
+      if (s.getMonth() === e.getMonth()) {
+        return `${sDay} - ${eDay} ${eMonth}, ${year}`;
+      } else {
+        return `${sDay} ${sMonth} — ${eDay} ${eMonth}, ${year}`;
+      }
+    }
+
+    function formatUzFullDate(d) {
+      const date = (d instanceof Date) ? d : new Date(d);
+      const weekday = UZ_WEEKDAYS[date.getDay()];
+      const day = date.getDate();
+      const month = UZ_MONTHS[date.getMonth()];
+      const year = date.getFullYear();
+      return `${weekday}, ${day}-${month.toLowerCase()}, ${year}`;
+    }
+
+    function formatUzDay(d) {
+      const date = (d instanceof Date) ? d : new Date(d);
+      return `${date.getDate()}-${UZ_MONTHS[date.getMonth()].toLowerCase()}`;
+    }
+
+    function formatUzMonth(year, monthIndex) {
+      return `${UZ_MONTHS[monthIndex]} ${year}`;
+    }
+
     function getTodayString() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1088,22 +1168,58 @@
     }
 
     /* ========================================================
-       3. TABLARNI ALMASHTIRISH
+       3. TABLARNI ALMASHTIRISH (PREMIUM DIZAYN & MAVZULAR)
        ======================================================== */
+    const TAB_THEMES = {
+      daily: { active: ['bg-emerald-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      weekly: { active: ['bg-blue-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      monthly: { active: ['bg-purple-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      yearly: { active: ['bg-amber-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      finance: { active: ['bg-emerald-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      habits: { active: ['bg-teal-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      notes: { active: ['bg-rose-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      pomodoro: { active: ['bg-red-500', 'text-white', 'shadow-xs', 'font-bold'] },
+      journal: { active: ['bg-indigo-600', 'text-white', 'shadow-xs', 'font-bold'] },
+      stats: { active: ['bg-sky-600', 'text-white', 'shadow-xs', 'font-bold'] }
+    };
+
+    const ALL_TAB_CLASSES = [
+      'bg-emerald-600', 'bg-blue-600', 'bg-purple-600', 'bg-amber-600', 'bg-teal-600',
+      'bg-rose-600', 'bg-red-500', 'bg-indigo-600', 'bg-sky-600', 'bg-emerald-50',
+      'dark:bg-emerald-950/60', 'text-white', 'shadow-xs', 'font-bold',
+      'text-emerald-600', 'dark:text-emerald-400'
+    ];
+
     function switchTab(tabName) {
       state.activeTab = tabName;
       document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
       const activeView = document.getElementById(`view-${tabName}`);
       if (activeView) activeView.classList.remove('hidden');
 
+      // 1. Yuqori Navigatsiya tugmalari
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-emerald-50', 'dark:bg-emerald-950/60', 'text-emerald-600', 'dark:text-emerald-400');
-        btn.classList.add('text-slate-500');
+        btn.classList.remove(...ALL_TAB_CLASSES);
+        btn.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:text-slate-900', 'dark:hover:text-white', 'hover:bg-slate-100', 'dark:hover:bg-slate-700/60');
       });
       const activeBtn = document.getElementById(`tabBtn-${tabName}`);
       if (activeBtn) {
-        activeBtn.classList.remove('text-slate-500');
-        activeBtn.classList.add('bg-emerald-50', 'dark:bg-emerald-950/60', 'text-emerald-600', 'dark:text-emerald-400');
+        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-700/60');
+        const theme = TAB_THEMES[tabName] || TAB_THEMES.daily;
+        activeBtn.classList.add(...theme.active);
+        try {
+          activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } catch (e) {}
+      }
+
+      // 2. Pastki mobil navigatsiya tugmalari
+      document.querySelectorAll('.bottom-tab-btn').forEach(btn => {
+        btn.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'font-bold', 'scale-105');
+        btn.classList.add('text-slate-500');
+      });
+      const activeBottomBtn = document.getElementById(`bottomTabBtn-${tabName}`);
+      if (activeBottomBtn) {
+        activeBottomBtn.classList.remove('text-slate-500');
+        activeBottomBtn.classList.add('text-emerald-600', 'dark:text-emerald-400', 'font-bold', 'scale-105');
       }
 
       renderCurrentTab();
@@ -1239,7 +1355,7 @@
 
       const dateParts = state.selectedDate.split('-').map(Number);
       const d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-      const dateStr = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      const dateStr = formatUzFullDate(d);
 
       let msg = `📋 Kunlik Rejalarim (${dateStr}):\n\n`;
       list.forEach((t, i) => {
@@ -1399,11 +1515,21 @@
       const d = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
       const isToday = state.selectedDate === getTodayString();
 
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const formatted = d.toLocaleDateString('uz-UZ', options);
+      const dailyTitleEl = document.getElementById('dailyDateTitle');
+      const dailySubEl = document.getElementById('dailyDateSubtitle');
+      const dailyBadgeEl = document.getElementById('dailyTodayBadge');
+      const dailyResetBtn = document.getElementById('dailyResetBtn');
 
-      document.getElementById('dailyDateTitle').textContent = isToday ? "Bugun" : formatted.split(',')[0];
-      document.getElementById('dailyDateSubtitle').textContent = formatted;
+      if (dailyTitleEl) dailyTitleEl.textContent = isToday ? "Bugun" : formatUzDay(d);
+      if (dailySubEl) dailySubEl.textContent = formatUzFullDate(d);
+      if (dailyBadgeEl) {
+        if (isToday) dailyBadgeEl.classList.remove('hidden');
+        else dailyBadgeEl.classList.add('hidden');
+      }
+      if (dailyResetBtn) {
+        if (isToday) dailyResetBtn.classList.add('hidden');
+        else dailyResetBtn.classList.remove('hidden');
+      }
 
       const list = state.daily[state.selectedDate] || [];
       const total = list.length;
@@ -1704,13 +1830,21 @@
       const range = getWeekDateRange(y, w);
       const isCurrent = targetWeek === getWeekString(new Date());
 
-      const sStr = range.start.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
-      const eStr = range.end.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' });
-
       const weekTitleEl = document.getElementById('weeklyWeekTitle');
       const weekSubEl = document.getElementById('weeklyWeekSubtitle');
-      if (weekTitleEl) weekTitleEl.textContent = `${w}-hafta ${isCurrent ? "(Joriy)" : ""}`;
-      if (weekSubEl) weekSubEl.textContent = `${sStr} — ${eStr}`;
+      const weekBadgeEl = document.getElementById('weeklyCurrentBadge');
+      const weekResetBtn = document.getElementById('weeklyResetBtn');
+
+      if (weekTitleEl) weekTitleEl.textContent = `${w}-hafta`;
+      if (weekSubEl) weekSubEl.textContent = formatUzWeekRange(range.start, range.end);
+      if (weekBadgeEl) {
+        if (isCurrent) weekBadgeEl.classList.remove('hidden');
+        else weekBadgeEl.classList.add('hidden');
+      }
+      if (weekResetBtn) {
+        if (isCurrent) weekResetBtn.classList.add('hidden');
+        else weekResetBtn.classList.remove('hidden');
+      }
 
       const list = state.weekly[targetWeek] || [];
       const total = list.length;
@@ -1793,16 +1927,23 @@
     function renderMonthly() {
       const targetMonth = state.selectedMonth || getMonthString(new Date());
       const [mY, mM] = targetMonth.split('-').map(Number);
-      const mDate = new Date(mY, mM - 1, 1);
       const isCurrent = targetMonth === getMonthString(new Date());
-
-      const monthName = mDate.toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
-      const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
       const mTitleEl = document.getElementById('monthlyMonthTitle');
       const mSubEl = document.getElementById('monthlyMonthSubtitle');
-      if (mTitleEl) mTitleEl.textContent = `${capMonth} ${isCurrent ? "(Joriy)" : ""}`;
+      const mBadgeEl = document.getElementById('monthlyCurrentBadge');
+      const mResetBtn = document.getElementById('monthlyResetBtn');
+
+      if (mTitleEl) mTitleEl.textContent = formatUzMonth(mY, mM - 1);
       if (mSubEl) mSubEl.textContent = `Oylik marralar va maqsadlar`;
+      if (mBadgeEl) {
+        if (isCurrent) mBadgeEl.classList.remove('hidden');
+        else mBadgeEl.classList.add('hidden');
+      }
+      if (mResetBtn) {
+        if (isCurrent) mResetBtn.classList.add('hidden');
+        else mResetBtn.classList.remove('hidden');
+      }
 
       const list = state.monthly[targetMonth] || [];
       const total = list.length;
@@ -2588,39 +2729,44 @@
       const titleEl = document.getElementById('financePeriodTitle');
       const subEl = document.getElementById('financePeriodSubtitle');
       const curBtn = document.getElementById('financePeriodCurrentBtn');
+      const curBadge = document.getElementById('financeCurrentBadge');
 
+      let isCur = false;
       if (period === 'monthly') {
         const curM = state.financeMonth || getMonthString(new Date());
         const [y, m] = curM.split('-').map(Number);
-        const d = new Date(y, m - 1, 1);
-        const mName = d.toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
-        const cap = mName.charAt(0).toUpperCase() + mName.slice(1);
-        const isCur = curM === getMonthString(new Date());
+        isCur = curM === getMonthString(new Date());
 
-        if (titleEl) titleEl.textContent = `${cap} ${isCur ? "(Joriy)" : ""}`;
+        if (titleEl) titleEl.textContent = formatUzMonth(y, m - 1);
         if (subEl) subEl.textContent = `Oylik barcha xarajat va daromadlar hisoboti`;
-        if (curBtn) curBtn.textContent = 'Joriy oy';
+        if (curBtn) curBtn.textContent = '↺ Joriy oy';
       } else if (period === 'weekly') {
         const curW = state.financeWeek || getWeekString(new Date());
         const [y, w] = curW.split('-W').map(Number);
         const range = getWeekDateRange(y, w);
-        const isCur = curW === getWeekString(new Date());
-        const sStr = range.start.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
-        const eStr = range.end.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' });
+        isCur = curW === getWeekString(new Date());
 
-        if (titleEl) titleEl.textContent = `${w}-hafta ${isCur ? "(Joriy)" : ""}`;
-        if (subEl) subEl.textContent = `${sStr} — ${eStr}`;
-        if (curBtn) curBtn.textContent = 'Joriy hafta';
+        if (titleEl) titleEl.textContent = `${w}-hafta`;
+        if (subEl) subEl.textContent = formatUzWeekRange(range.start, range.end);
+        if (curBtn) curBtn.textContent = '↺ Joriy hafta';
       } else {
         const curD = state.financeDate || state.selectedDate || getTodayString();
         const [y, m, dNum] = curD.split('-').map(Number);
         const d = new Date(y, m - 1, dNum);
-        const formatted = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        const isCur = curD === getTodayString();
+        isCur = curD === getTodayString();
 
-        if (titleEl) titleEl.textContent = isCur ? "Bugun" : formatted.split(',')[0];
-        if (subEl) subEl.textContent = formatted;
-        if (curBtn) curBtn.textContent = 'Bugun';
+        if (titleEl) titleEl.textContent = isCur ? "Bugun" : formatUzDay(d);
+        if (subEl) subEl.textContent = formatUzFullDate(d);
+        if (curBtn) curBtn.textContent = '↺ Bugun';
+      }
+
+      if (curBadge) {
+        if (isCur) curBadge.classList.remove('hidden');
+        else curBadge.classList.add('hidden');
+      }
+      if (curBtn) {
+        if (isCur) curBtn.classList.add('hidden');
+        else curBtn.classList.remove('hidden');
       }
 
       // Sana kiritish maydoni (agar bo'sh bo'lsa bugungi sana)

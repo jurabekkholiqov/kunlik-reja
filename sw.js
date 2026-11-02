@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rejapro-v10-finance-monthly';
+const CACHE_NAME = 'rejapro-v11-clean-navigation';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
