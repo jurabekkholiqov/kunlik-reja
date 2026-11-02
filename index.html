@@ -63,41 +63,41 @@
 
   <!-- Yuqori Asosiy Header -->
   <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-2xs">
-    <div class="max-w-4xl mx-auto px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+    <div class="max-w-4xl mx-auto px-3 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between">
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-sm">
           ✓
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">RejaPro</h1>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Shaxsiy samaradorlik tizimi</p>
+          <h1 class="text-sm sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">RejaPro</h1>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden xs:block">Shaxsiy samaradorlik</p>
         </div>
       </div>
       
       <!-- O'ng tomondagi tugmalar -->
       <div class="flex items-center gap-1 sm:gap-1.5">
-        <button onclick="openSearchModal()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tezkor Qidiruv (Ctrl+K)">
+        <button onclick="openSearchModal()" class="p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tezkor Qidiruv (Ctrl+K)">
           <span>🔍</span>
         </button>
-        <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
+        <button id="syncStatusBtn" onclick="openSyncModal()" class="text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-2 py-1.5 sm:px-2.5 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Bulutli Sinxronizatsiya">
           <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="hidden sm:inline">Sinxron</span>
           <span id="syncStatusIcon">☁️</span>
         </button>
-        <button id="headerInstallBtn" onclick="triggerAppInstall()" class="text-xs bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1.5 transition">
-          <span>📲</span> <span class="hidden sm:inline">Ilovani</span> O'rnatish
+        <button id="headerInstallBtn" onclick="triggerAppInstall()" class="text-xs bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-2.5 py-1.5 sm:px-3 rounded-xl shadow-xs flex items-center gap-1.5 transition" title="Ilovani o'rnatish">
+          <span>📲</span> <span class="hidden sm:inline">O'rnatish</span>
         </button>
-        <button onclick="openModal('backupModal')" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Zaxira va Sozlamalar">
+        <button onclick="openModal('backupModal')" class="p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Zaxira va Sozlamalar">
           ⚙️
         </button>
-        <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tungi / Kunduzgi rejim">
+        <button onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Tungi / Kunduzgi rejim">
           <span id="themeIcon">🌙</span>
         </button>
       </div>
     </div>
 
-    <!-- Asosiy Tartibli Navigatsiya (2 ta toza guruh) -->
-    <nav class="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/60 px-2 sm:px-4 py-2">
+    <!-- Asosiy Tartibli Navigatsiya (Faqat Planshet va Kompyuterda, telefonda esa pastki bar ishlaydi) -->
+    <nav class="hidden sm:block border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/60 px-2 sm:px-4 py-2">
       <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
         
         <!-- 1-Guruh: Rejalar (Vaqt bo'yicha) -->
@@ -145,7 +145,7 @@
   </header>
 
   <!-- Asosiy Kontent Bo'limi -->
-  <main class="max-w-4xl w-full mx-auto p-3 sm:p-5 flex-1 flex flex-col pb-20">
+  <main class="max-w-4xl w-full mx-auto p-3 sm:p-5 flex-1 flex flex-col pb-24 sm:pb-12">
 
     <!-- ==================== 1. KUNLIK BO'LIM ==================== -->
     <section id="view-daily" class="tab-view flex-1 flex flex-col space-y-4">
@@ -718,40 +718,102 @@
 
   </main>
 
-  <!-- Pastki Mobil Tezkor Navigation Bar -->
-  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 py-1.5 px-1 z-30 no-print sm:hidden flex justify-around text-[9px] font-semibold text-slate-500 overflow-x-auto no-scrollbar shadow-lg">
-    <button onclick="switchTab('daily')" id="bottomTabBtn-daily" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 transition">
-      <span class="text-base">📅</span>
+  <!-- Pastki Mobil Ergonomik Navigation Bar (5 ta toza tugma) -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 py-1 px-1 z-40 no-print sm:hidden flex items-center justify-around text-[10px] font-semibold text-slate-500 shadow-lg">
+    <button onclick="switchTab('daily')" id="bottomTabBtn-daily" class="bottom-tab-btn flex-1 py-1 flex flex-col items-center gap-0.5 text-emerald-600 dark:text-emerald-400 font-bold transition active:scale-95">
+      <span class="text-base sm:text-lg">📅</span>
       <span>Kunlik</span>
     </button>
-    <button onclick="switchTab('weekly')" id="bottomTabBtn-weekly" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">📆</span>
+    <button onclick="switchTab('weekly')" id="bottomTabBtn-weekly" class="bottom-tab-btn flex-1 py-1 flex flex-col items-center gap-0.5 hover:text-slate-900 dark:hover:text-white transition active:scale-95">
+      <span class="text-base sm:text-lg">📆</span>
       <span>Haftalik</span>
     </button>
-    <button onclick="switchTab('monthly')" id="bottomTabBtn-monthly" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">🗓️</span>
+    <button onclick="switchTab('monthly')" id="bottomTabBtn-monthly" class="bottom-tab-btn flex-1 py-1 flex flex-col items-center gap-0.5 hover:text-slate-900 dark:hover:text-white transition active:scale-95">
+      <span class="text-base sm:text-lg">🗓️</span>
       <span>Oylik</span>
     </button>
-    <button onclick="switchTab('finance')" id="bottomTabBtn-finance" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">💰</span>
+    <button onclick="switchTab('finance')" id="bottomTabBtn-finance" class="bottom-tab-btn flex-1 py-1 flex flex-col items-center gap-0.5 hover:text-slate-900 dark:hover:text-white transition active:scale-95">
+      <span class="text-base sm:text-lg">💰</span>
       <span>Moliya</span>
     </button>
-    <button onclick="switchTab('habits')" id="bottomTabBtn-habits" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">⚡</span>
-      <span>Odatlar</span>
+    <button onclick="toggleMobileToolsSheet()" id="bottomTabBtn-tools" class="bottom-tab-btn flex-1 py-1 flex flex-col items-center gap-0.5 hover:text-slate-900 dark:hover:text-white transition active:scale-95">
+      <span id="bottomTabBtn-tools-icon" class="text-base sm:text-lg">⚡</span>
+      <span id="bottomTabBtn-tools-label">Asboblar</span>
     </button>
-    <button onclick="switchTab('notes')" id="bottomTabBtn-notes" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">📌</span>
-      <span>Eslatma</span>
-    </button>
-    <button onclick="switchTab('pomodoro')" id="bottomTabBtn-pomodoro" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">⏱️</span>
-      <span>Fokus</span>
-    </button>
-    <button onclick="switchTab('stats')" id="bottomTabBtn-stats" class="bottom-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 hover:text-slate-900 dark:hover:text-white shrink-0 transition">
-      <span class="text-base">📊</span>
-      <span>Tahlil</span>
-    </button>
+  </div>
+
+  <!-- Mobil Asboblar va Qo'shimcha Bo'limlar Modali (Bottom Sheet) -->
+  <div id="mobileToolsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-end justify-center sm:hidden transition-all duration-300" onclick="if(event.target === this) closeMobileToolsSheet()">
+    <div class="bg-white dark:bg-slate-900 rounded-t-3xl p-5 w-full max-w-lg border-t border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+      
+      <!-- Sheet Handle & Sarlavha -->
+      <div class="flex flex-col items-center">
+        <div class="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mb-3 cursor-pointer" onclick="closeMobileToolsSheet()"></div>
+        <div class="w-full flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">⚡</span>
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Qo'shimcha Bo'limlar & Asboblar</h3>
+          </div>
+          <button onclick="closeMobileToolsSheet()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center text-sm font-bold">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Asboblar kartochkalari tarmog'i (2 ustunli) -->
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        
+        <button onclick="selectMobileTool('yearly')" class="flex flex-col items-start p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">🎯</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Yillik Maqsadlar</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Strategik katta marralar</span>
+        </button>
+
+        <button onclick="selectMobileTool('habits')" class="flex flex-col items-start p-3 rounded-2xl bg-teal-50/70 dark:bg-teal-950/30 border border-teal-200/60 dark:border-teal-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">⚡</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Odatlar Trekeri</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Kunlik yaxshi odatlar</span>
+        </button>
+
+        <button onclick="selectMobileTool('notes')" class="flex flex-col items-start p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">📌</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Eslatmalar Doskasi</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Rangli fikrlar va stikerlar</span>
+        </button>
+
+        <button onclick="selectMobileTool('pomodoro')" class="flex flex-col items-start p-3 rounded-2xl bg-red-50/70 dark:bg-red-950/30 border border-red-200/60 dark:border-red-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">⏱️</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Pomodoro Fokus</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Chuqur ishlash taymeri</span>
+        </button>
+
+        <button onclick="selectMobileTool('journal')" class="flex flex-col items-start p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">📝</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Kunlik Xulosalar</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Kechki tahlil va minnatdorchilik</span>
+        </button>
+
+        <button onclick="selectMobileTool('stats')" class="flex flex-col items-start p-3 rounded-2xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/40 text-left transition active:scale-95">
+          <span class="text-2xl mb-1">📊</span>
+          <span class="text-xs font-bold text-slate-900 dark:text-white">Natijalar Tahlili</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Grafik va statistika</span>
+        </button>
+
+      </div>
+
+      <!-- Tezkor Sozlamalar tugmasi -->
+      <button onclick="closeMobileToolsSheet(); openModal('backupModal')" class="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/60 transition active:scale-98">
+        <div class="flex items-center gap-2.5">
+          <span class="text-lg">⚙️</span>
+          <div class="text-left">
+            <p class="text-xs font-bold text-slate-800 dark:text-white">Sozlamalar va Zaxira</p>
+            <p class="text-[10px] text-slate-400">Bulutli sinxron va ma'lumotlar xavfsizligi</p>
+          </div>
+        </div>
+        <span class="text-slate-400 text-xs">➔</span>
+      </button>
+
+    </div>
   </div>
 
   <!-- Sozlamalar va Zaxira Modali -->
@@ -1211,18 +1273,65 @@
         } catch (e) {}
       }
 
-      // 2. Pastki mobil navigatsiya tugmalari
-      document.querySelectorAll('.bottom-tab-btn').forEach(btn => {
-        btn.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'font-bold', 'scale-105');
-        btn.classList.add('text-slate-500');
-      });
-      const activeBottomBtn = document.getElementById(`bottomTabBtn-${tabName}`);
-      if (activeBottomBtn) {
-        activeBottomBtn.classList.remove('text-slate-500');
-        activeBottomBtn.classList.add('text-emerald-600', 'dark:text-emerald-400', 'font-bold', 'scale-105');
-      }
+      // 2. Pastki mobil ergonomik navigatsiya yangilanishi
+      updateMobileBottomNav(tabName);
 
       renderCurrentTab();
+    }
+
+    const SECONDARY_TOOLS = {
+      yearly: { icon: '🎯', label: 'Yillik', color: 'text-amber-500' },
+      habits: { icon: '⚡', label: 'Odatlar', color: 'text-teal-500' },
+      notes: { icon: '📌', label: 'Eslatma', color: 'text-rose-500' },
+      pomodoro: { icon: '⏱️', label: 'Fokus', color: 'text-red-500' },
+      journal: { icon: '📝', label: 'Xulosa', color: 'text-indigo-500' },
+      stats: { icon: '📊', label: 'Tahlil', color: 'text-sky-500' }
+    };
+
+    function updateMobileBottomNav(tabName) {
+      const primaryTabs = ['daily', 'weekly', 'monthly', 'finance'];
+      
+      document.querySelectorAll('.bottom-tab-btn').forEach(btn => {
+        btn.classList.remove('text-emerald-600', 'dark:text-emerald-400', 'text-amber-500', 'text-teal-500', 'text-rose-500', 'text-red-500', 'text-indigo-500', 'text-sky-500', 'font-bold');
+        btn.classList.add('text-slate-500');
+      });
+
+      const toolsBtn = document.getElementById('bottomTabBtn-tools');
+      const toolsIcon = document.getElementById('bottomTabBtn-tools-icon');
+      const toolsLabel = document.getElementById('bottomTabBtn-tools-label');
+
+      if (primaryTabs.includes(tabName)) {
+        const activeBtn = document.getElementById(`bottomTabBtn-${tabName}`);
+        if (activeBtn) {
+          activeBtn.classList.remove('text-slate-500');
+          activeBtn.classList.add('text-emerald-600', 'dark:text-emerald-400', 'font-bold');
+        }
+        if (toolsIcon) toolsIcon.textContent = '⚡';
+        if (toolsLabel) toolsLabel.textContent = 'Asboblar';
+      } else if (SECONDARY_TOOLS[tabName]) {
+        const toolInfo = SECONDARY_TOOLS[tabName];
+        if (toolsBtn) {
+          toolsBtn.classList.remove('text-slate-500');
+          toolsBtn.classList.add(toolInfo.color, 'font-bold');
+        }
+        if (toolsIcon) toolsIcon.textContent = toolInfo.icon;
+        if (toolsLabel) toolsLabel.textContent = toolInfo.label;
+      }
+    }
+
+    function toggleMobileToolsSheet() {
+      const modal = document.getElementById('mobileToolsModal');
+      if (modal) modal.classList.toggle('hidden');
+    }
+
+    function closeMobileToolsSheet() {
+      const modal = document.getElementById('mobileToolsModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function selectMobileTool(toolName) {
+      closeMobileToolsSheet();
+      switchTab(toolName);
     }
 
     function renderCurrentTab() {
