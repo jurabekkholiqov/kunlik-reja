@@ -277,6 +277,25 @@
         </div>
       </div>
 
+      <!-- Hafta Tanlash va Navigatsiya Bar -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <button onclick="changeWeeklyWeek(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi hafta">
+          ◀
+        </button>
+        <div class="text-center cursor-pointer" onclick="goCurrentWeek()">
+          <p id="weeklyWeekTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">45-hafta (Joriy)</p>
+          <p id="weeklyWeekSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">2 - 8 Noyabr, 2026</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="goCurrentWeek()" class="text-xs px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-100 transition">
+            Joriy hafta
+          </button>
+          <button onclick="changeWeeklyWeek(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi hafta">
+            ▶
+          </button>
+        </div>
+      </div>
+
       <!-- Yangi haftalik vazifa formasi -->
       <form onsubmit="handleWeeklySubmit(event)" class="flex gap-2">
         <input 
@@ -308,6 +327,25 @@
             <p class="text-xs text-purple-100 mt-0.5">Oy davomida amalga oshirilishi shart bo'lgan ishlar</p>
           </div>
           <span id="monthlyProgressBadge" class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">0%</span>
+        </div>
+      </div>
+
+      <!-- Oy Tanlash va Navigatsiya Bar -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <button onclick="changeMonthlyMonth(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi oy">
+          ◀
+        </button>
+        <div class="text-center cursor-pointer" onclick="goCurrentMonth()">
+          <p id="monthlyMonthTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Noyabr 2026</p>
+          <p id="monthlyMonthSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Oylik marralar rejasi</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="goCurrentMonth()" class="text-xs px-2.5 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-semibold hover:bg-purple-100 transition">
+            Joriy oy
+          </button>
+          <button onclick="changeMonthlyMonth(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi oy">
+            ▶
+          </button>
         </div>
       </div>
 
@@ -436,13 +474,22 @@
 
     <!-- ==================== 6. MOLIYA & XARAJATLAR BO'LIMI ==================== -->
     <section id="view-finance" class="tab-view hidden flex-1 flex flex-col space-y-4">
-      <div class="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-2xl p-4 shadow-sm">
-        <div class="flex items-center justify-between">
+      <!-- Moliya Asosiy Banner -->
+      <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-green-700 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 class="text-lg font-bold flex items-center gap-2"><span>💰</span> Kunlik Moliya & Xarajatlar</h2>
-            <p id="financeDateSubtitle" class="text-xs text-emerald-100 mt-0.5">Kunlik tushum va xarajatlar hisoblagichi</p>
+            <h2 class="text-lg font-bold flex items-center gap-2"><span>💰</span> Moliya & Xarajatlar</h2>
+            <p id="financeHeaderSubtitle" class="text-xs text-emerald-100 mt-0.5">Oylik, haftalik va kunlik hisob-kitob</p>
+          </div>
+          <!-- Davrni almashtirish (Oylik / Haftalik / Kunlik) -->
+          <div class="flex bg-black/20 p-1 rounded-xl text-xs font-semibold gap-1">
+            <button onclick="setFinancePeriod('monthly')" id="finPeriod-monthly" class="px-2.5 py-1 rounded-lg bg-white text-emerald-800 shadow-xs transition">🗓️ Oylik</button>
+            <button onclick="setFinancePeriod('weekly')" id="finPeriod-weekly" class="px-2.5 py-1 rounded-lg text-emerald-100 hover:text-white transition">📆 Haftalik</button>
+            <button onclick="setFinancePeriod('daily')" id="finPeriod-daily" class="px-2.5 py-1 rounded-lg text-emerald-100 hover:text-white transition">📅 Kunlik</button>
           </div>
         </div>
+
+        <!-- Statistika Vidjetlari -->
         <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/20 text-center">
           <div class="bg-white/10 rounded-xl p-2">
             <p class="text-[10px] text-emerald-200">Daromad</p>
@@ -453,23 +500,48 @@
             <p id="financeTotalExpense" class="text-xs sm:text-sm font-bold text-red-100">0 so'm</p>
           </div>
           <div class="bg-white/10 rounded-xl p-2">
-            <p class="text-[10px] text-emerald-200">Qoldiq</p>
+            <p class="text-[10px] text-emerald-200">Sof Qoldiq</p>
             <p id="financeNetBalance" class="text-xs sm:text-sm font-bold text-white">0 so'm</p>
           </div>
         </div>
       </div>
 
+      <!-- Davr Navigatsiyasi (Oy, Hafta yoki Kun bo'yicha siljish) -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <button onclick="changeFinancePeriodDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Oldingi davr">
+          ◀
+        </button>
+        <div class="text-center cursor-pointer" onclick="goFinancePeriodCurrent()">
+          <p id="financePeriodTitle" class="text-sm font-bold text-slate-900 dark:text-white capitalize leading-tight">Oktyabr 2026</p>
+          <p id="financePeriodSubtitle" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Barcha xarajat va daromadlar</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="goFinancePeriodCurrent()" id="financePeriodCurrentBtn" class="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
+            Joriy oy
+          </button>
+          <button onclick="changeFinancePeriodDate(1)" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Keyingi davr">
+            ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- Kategoriyalar bo'yicha qisqacha taqsimot -->
+      <div id="financeCategoryBreakdown" class="bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs text-xs space-y-2">
+        <!-- JS to'ldiradi -->
+      </div>
+
       <!-- Yangi xarajat/daromad kiritish -->
       <form onsubmit="handleFinanceSubmit(event)" class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5">
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap sm:flex-nowrap">
           <select id="financeType" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none">
             <option value="expense">🔴 Xarajat</option>
             <option value="income">🟢 Daromad</option>
           </select>
-          <input type="number" id="financeAmount" placeholder="Summa (masalan: 35000)" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500 font-mono" required />
+          <input type="number" id="financeAmount" placeholder="Summa (masalan: 35000)" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500 font-mono min-w-[130px]" required />
+          <input type="date" id="financeDateInput" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-700 dark:text-slate-300 outline-none font-mono" />
         </div>
         <div class="flex gap-2">
-          <input type="text" id="financeDesc" placeholder="Izoh (masalan: Tushlik, Yo'l kira, Maosh)..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500" required />
+          <input type="text" id="financeDesc" placeholder="Izoh (masalan: Bozorlik, Tushlik, Yo'l kira, Maosh)..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500" required />
           <select id="financeCat" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2 text-xs text-slate-700 dark:text-slate-300 outline-none">
             <option value="food">🍔 Taom</option>
             <option value="transport">🚕 Transport</option>
@@ -484,11 +556,21 @@
         </div>
       </form>
 
+      <!-- Filtrlar (Barchasi / Xarajat / Daromad) -->
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
+        <div class="flex gap-1 bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
+          <button onclick="setFinanceTypeFilter('all')" id="finTypeFilter-all" class="px-2.5 py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">Hammasi</button>
+          <button onclick="setFinanceTypeFilter('expense')" id="finTypeFilter-expense" class="px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Faqat xarajat</button>
+          <button onclick="setFinanceTypeFilter('income')" id="finTypeFilter-income" class="px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white">Faqat tushum</button>
+        </div>
+        <span id="financeItemsCount" class="text-[11px] text-slate-400 font-medium">0 ta amal</span>
+      </div>
+
       <!-- Moliya ro'yxati -->
       <div id="financeList" class="space-y-2 flex-1 min-h-[140px]"></div>
       <div id="financeEmpty" class="hidden text-center py-10 text-slate-400">
         <div class="text-3xl mb-1">💳</div>
-        <p class="text-xs">Ushbu kunga xarajat yoki daromad kiritilmagan</p>
+        <p class="text-xs" id="financeEmptyMsg">Ushbu davrga xarajat yoki daromad kiritilmagan</p>
       </div>
     </section>
 
@@ -871,6 +953,11 @@
     const defaultState = {
       activeTab: 'daily',
       selectedDate: getTodayString(),
+      selectedWeek: getWeekString(new Date()),
+      selectedMonth: getMonthString(new Date()),
+      financePeriod: 'monthly', // 'monthly', 'weekly', 'daily'
+      financeMonth: getMonthString(new Date()),
+      financeWeek: getWeekString(new Date()),
       daily: {},    // { '2026-10-24': [ {id, text, completed, priority, category} ] }
       weekly: {},   // { '2026-W43': [ {id, text, completed} ] }
       monthly: {},  // { '2026-10': [ {id, text, completed} ] }
@@ -893,40 +980,60 @@
     let state = loadState();
 
     function loadState() {
+      let loaded = null;
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (!parsed.notes) parsed.notes = defaultState.notes;
-          return { ...defaultState, ...parsed };
+          loaded = { ...defaultState, ...parsed };
         }
       } catch (e) {}
-      // Dastlabki demo ma'lumotlar bilan to'ldirish
-      const today = getTodayString();
-      const currentWeek = getWeekString(new Date());
-      const currentMonth = getMonthString(new Date());
-      const currentYear = String(new Date().getFullYear());
 
-      const initial = JSON.parse(JSON.stringify(defaultState));
-      initial.selectedDate = today;
-      initial.daily[today] = [
-        { id: 1, text: "Ertalabki rejalarni belgilash", completed: true, priority: "high", category: "work" },
-        { id: 2, text: "Eng muhim vazifani yakunlash", completed: false, priority: "high", category: "work" },
-        { id: 3, text: "Kun yakunida hisobot yoki tahlil", completed: false, priority: "medium", category: "study" }
-      ];
-      initial.weekly[currentWeek] = [
-        { id: 101, text: "Haftalik asosiy loyihani topshirish", completed: false },
-        { id: 102, text: "Haftada 3 marta sport bilan shug'ullanish", completed: true }
-      ];
-      initial.monthly[currentMonth] = [
-        { id: 201, text: "1 ta foydali kitobni to'liq o'qib chiqish", completed: false },
-        { id: 202, text: "Oylik moliyaviy sarf-xarajatlar rejasiga rioya qilish", completed: true }
-      ];
-      initial.yearly[currentYear] = [
-        { id: 301, text: "Chet tili darajasini oshirish (IELTS / CEFR)", completed: false, progress: 40 },
-        { id: 302, text: "IT sohasida yangi mustaqil loyihani ishga tushirish", completed: false, progress: 65 }
-      ];
-      return initial;
+      if (!loaded) {
+        // Dastlabki demo ma'lumotlar bilan to'ldirish
+        const today = getTodayString();
+        const currentWeek = getWeekString(new Date());
+        const currentMonth = getMonthString(new Date());
+        const currentYear = String(new Date().getFullYear());
+
+        loaded = JSON.parse(JSON.stringify(defaultState));
+        loaded.selectedDate = today;
+        loaded.daily[today] = [
+          { id: 1, text: "Ertalabki rejalarni belgilash", completed: true, priority: "high", category: "work" },
+          { id: 2, text: "Eng muhim vazifani yakunlash", completed: false, priority: "high", category: "work" },
+          { id: 3, text: "Kun yakunida hisobot yoki tahlil", completed: false, priority: "medium", category: "study" }
+        ];
+        loaded.weekly[currentWeek] = [
+          { id: 101, text: "Haftalik asosiy loyihani topshirish", completed: false },
+          { id: 102, text: "Haftada 3 marta sport bilan shug'ullanish", completed: true }
+        ];
+        loaded.monthly[currentMonth] = [
+          { id: 201, text: "1 ta foydali kitobni to'liq o'qib chiqish", completed: false },
+          { id: 202, text: "Oylik moliyaviy sarf-xarajatlar rejasiga rioya qilish", completed: true }
+        ];
+        loaded.yearly[currentYear] = [
+          { id: 301, text: "Chet tili darajasini oshirish (IELTS / CEFR)", completed: false, progress: 40 },
+          { id: 302, text: "IT sohasida yangi mustaqil loyihani ishga tushirish", completed: false, progress: 65 }
+        ];
+      }
+
+      // O'tgan haftadagi rejalarni avtomatik ko'chirish (Agar 2026-W44 da bo'lib, W45 da hali bo'sh bo'lsa)
+      if (loaded.weekly) {
+        const curWeek = getWeekString(new Date());
+        if (!loaded.weekly[curWeek] || loaded.weekly[curWeek].length === 0) {
+          const [y, w] = curWeek.split('-W').map(Number);
+          const range = getWeekDateRange(y, w);
+          const prevD = new Date(range.start);
+          prevD.setDate(prevD.getDate() - 7);
+          const prevWeek = getWeekString(prevD);
+          if (loaded.weekly[prevWeek] && loaded.weekly[prevWeek].length > 0) {
+            loaded.weekly[curWeek] = JSON.parse(JSON.stringify(loaded.weekly[prevWeek]));
+          }
+        }
+      }
+
+      return loaded;
     }
 
     function saveLocalOnly() {
@@ -961,6 +1068,19 @@
       }
       const week = 1 + Math.ceil((firstThursday - target) / 604800000);
       return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
+    }
+
+    function getWeekDateRange(year, week) {
+      const simple = new Date(year, 0, 1 + (week - 1) * 7);
+      const dow = simple.getDay();
+      const ISOweekStart = simple;
+      if (dow <= 4)
+        ISOweekStart.setDate(simple.getDate() - (simple.getDay() || 7) + 1);
+      else
+        ISOweekStart.setDate(simple.getDate() + 8 - (simple.getDay() || 7));
+      const ISOweekEnd = new Date(ISOweekStart);
+      ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
+      return { start: ISOweekStart, end: ISOweekEnd };
     }
 
     function getMonthString(d) {
@@ -1530,23 +1650,40 @@
     /* ========================================================
        5. HAFTALIK (WEEKLY) REJALAR LOGIKASI
        ======================================================== */
+    function changeWeeklyWeek(offset) {
+      const cur = state.selectedWeek || getWeekString(new Date());
+      const [y, w] = cur.split('-W').map(Number);
+      const range = getWeekDateRange(y, w);
+      const nextDate = new Date(range.start);
+      nextDate.setDate(nextDate.getDate() + offset * 7);
+      state.selectedWeek = getWeekString(nextDate);
+      saveState();
+      renderWeekly();
+    }
+
+    function goCurrentWeek() {
+      state.selectedWeek = getWeekString(new Date());
+      saveState();
+      renderWeekly();
+    }
+
     function handleWeeklySubmit(e) {
       e.preventDefault();
       const input = document.getElementById('weeklyInput');
       const text = input.value.trim();
       if (!text) return;
-      const currentWeek = getWeekString(new Date());
+      const targetWeek = state.selectedWeek || getWeekString(new Date());
 
-      if (!state.weekly[currentWeek]) state.weekly[currentWeek] = [];
-      state.weekly[currentWeek].unshift({ id: Date.now(), text, completed: false });
+      if (!state.weekly[targetWeek]) state.weekly[targetWeek] = [];
+      state.weekly[targetWeek].unshift({ id: Date.now(), text, completed: false });
       input.value = '';
       saveState();
       renderWeekly();
     }
 
     function toggleWeekly(id) {
-      const currentWeek = getWeekString(new Date());
-      const list = state.weekly[currentWeek] || [];
+      const targetWeek = state.selectedWeek || getWeekString(new Date());
+      const list = state.weekly[targetWeek] || [];
       const item = list.find(t => t.id === id);
       if (item) item.completed = !item.completed;
       saveState();
@@ -1554,16 +1691,28 @@
     }
 
     function deleteWeekly(id) {
-      const currentWeek = getWeekString(new Date());
-      if (!state.weekly[currentWeek]) return;
-      state.weekly[currentWeek] = state.weekly[currentWeek].filter(t => t.id !== id);
+      const targetWeek = state.selectedWeek || getWeekString(new Date());
+      if (!state.weekly[targetWeek]) return;
+      state.weekly[targetWeek] = state.weekly[targetWeek].filter(t => t.id !== id);
       saveState();
       renderWeekly();
     }
 
     function renderWeekly() {
-      const currentWeek = getWeekString(new Date());
-      const list = state.weekly[currentWeek] || [];
+      const targetWeek = state.selectedWeek || getWeekString(new Date());
+      const [y, w] = targetWeek.split('-W').map(Number);
+      const range = getWeekDateRange(y, w);
+      const isCurrent = targetWeek === getWeekString(new Date());
+
+      const sStr = range.start.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
+      const eStr = range.end.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const weekTitleEl = document.getElementById('weeklyWeekTitle');
+      const weekSubEl = document.getElementById('weeklyWeekSubtitle');
+      if (weekTitleEl) weekTitleEl.textContent = `${w}-hafta ${isCurrent ? "(Joriy)" : ""}`;
+      if (weekSubEl) weekSubEl.textContent = `${sStr} — ${eStr}`;
+
+      const list = state.weekly[targetWeek] || [];
       const total = list.length;
       const done = list.filter(t => t.completed).length;
       const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -1595,23 +1744,38 @@
     /* ========================================================
        6. OYLIK (MONTHLY) REJALAR LOGIKASI
        ======================================================== */
+    function changeMonthlyMonth(offset) {
+      const cur = state.selectedMonth || getMonthString(new Date());
+      const [mY, mM] = cur.split('-').map(Number);
+      const d = new Date(mY, mM - 1 + offset, 1);
+      state.selectedMonth = getMonthString(d);
+      saveState();
+      renderMonthly();
+    }
+
+    function goCurrentMonth() {
+      state.selectedMonth = getMonthString(new Date());
+      saveState();
+      renderMonthly();
+    }
+
     function handleMonthlySubmit(e) {
       e.preventDefault();
       const input = document.getElementById('monthlyInput');
       const text = input.value.trim();
       if (!text) return;
-      const currentMonth = getMonthString(new Date());
+      const targetMonth = state.selectedMonth || getMonthString(new Date());
 
-      if (!state.monthly[currentMonth]) state.monthly[currentMonth] = [];
-      state.monthly[currentMonth].unshift({ id: Date.now(), text, completed: false });
+      if (!state.monthly[targetMonth]) state.monthly[targetMonth] = [];
+      state.monthly[targetMonth].unshift({ id: Date.now(), text, completed: false });
       input.value = '';
       saveState();
       renderMonthly();
     }
 
     function toggleMonthly(id) {
-      const currentMonth = getMonthString(new Date());
-      const list = state.monthly[currentMonth] || [];
+      const targetMonth = state.selectedMonth || getMonthString(new Date());
+      const list = state.monthly[targetMonth] || [];
       const item = list.find(t => t.id === id);
       if (item) item.completed = !item.completed;
       saveState();
@@ -1619,11 +1783,54 @@
     }
 
     function deleteMonthly(id) {
-      const currentMonth = getMonthString(new Date());
-      if (!state.monthly[currentMonth]) return;
-      state.monthly[currentMonth] = state.monthly[currentMonth].filter(t => t.id !== id);
+      const targetMonth = state.selectedMonth || getMonthString(new Date());
+      if (!state.monthly[targetMonth]) return;
+      state.monthly[targetMonth] = state.monthly[targetMonth].filter(t => t.id !== id);
       saveState();
       renderMonthly();
+    }
+
+    function renderMonthly() {
+      const targetMonth = state.selectedMonth || getMonthString(new Date());
+      const [mY, mM] = targetMonth.split('-').map(Number);
+      const mDate = new Date(mY, mM - 1, 1);
+      const isCurrent = targetMonth === getMonthString(new Date());
+
+      const monthName = mDate.toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
+      const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+      const mTitleEl = document.getElementById('monthlyMonthTitle');
+      const mSubEl = document.getElementById('monthlyMonthSubtitle');
+      if (mTitleEl) mTitleEl.textContent = `${capMonth} ${isCurrent ? "(Joriy)" : ""}`;
+      if (mSubEl) mSubEl.textContent = `Oylik marralar va maqsadlar`;
+
+      const list = state.monthly[targetMonth] || [];
+      const total = list.length;
+      const done = list.filter(t => t.completed).length;
+      const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      document.getElementById('monthlyProgressBadge').textContent = `${done}/${total} (${pct}%)`;
+
+      const listEl = document.getElementById('monthlyList');
+      const emptyEl = document.getElementById('monthlyEmpty');
+
+      if (list.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = list.map(t => `
+          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${t.completed ? 'bg-slate-100/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs'} transition gap-3">
+            <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
+              <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleMonthly(${t.id})" class="w-5 h-5 rounded text-purple-600 accent-purple-600 cursor-pointer shrink-0">
+              <span class="text-sm font-medium ${t.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">
+                ${escapeHtml(t.text)}
+              </span>
+            </label>
+            <button onclick="deleteMonthly(${t.id})" class="text-slate-400 hover:text-red-500 text-sm px-2 py-1">✕</button>
+          </div>
+        `).join('');
+      }
     }
 
     function renderMonthly() {
@@ -2053,6 +2260,24 @@
         });
       }
 
+      // 5. Moliya va Xarajatlar
+      if (state.finance) {
+        Object.entries(state.finance).forEach(([date, list]) => {
+          if (Array.isArray(list)) {
+            list.forEach(f => {
+              if (f.desc && f.desc.toLowerCase().includes(q)) {
+                results.push({
+                  type: 'finance',
+                  title: `${f.type === 'income' ? '+' : '-'}${Number(f.amount).toLocaleString('uz-UZ')} so'm: ${f.desc}`,
+                  date: date,
+                  category: f.category
+                });
+              }
+            });
+          }
+        });
+      }
+
       if (results.length === 0) {
         container.innerHTML = `
           <div class="text-center py-8 text-slate-400">
@@ -2075,10 +2300,13 @@
           clickHandler = `jumpToNotes()`;
         } else if (r.type === 'weekly') {
           typeBadge = `<span class="text-[10px] bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded-md font-semibold">📆 ${r.date}</span>`;
-          clickHandler = `switchTab('weekly'); closeModal('searchModal');`;
+          clickHandler = `state.selectedWeek = '${r.date}'; saveState(); switchTab('weekly'); closeModal('searchModal');`;
+        } else if (r.type === 'finance') {
+          typeBadge = `<span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-md font-semibold">💰 ${r.date}</span>`;
+          clickHandler = `jumpToFinance('${r.date}')`;
         } else {
           typeBadge = `<span class="text-[10px] bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-md font-semibold">🗓️ ${r.date}</span>`;
-          clickHandler = `switchTab('monthly'); closeModal('searchModal');`;
+          clickHandler = `state.selectedMonth = '${r.date}'; saveState(); switchTab('monthly'); closeModal('searchModal');`;
         }
 
         return `
@@ -2115,6 +2343,14 @@
     function jumpToNotes() {
       closeModal('searchModal');
       switchTab('notes');
+    }
+
+    function jumpToFinance(dateStr) {
+      state.financeMonth = dateStr.slice(0, 7);
+      state.financeDate = dateStr;
+      saveState();
+      closeModal('searchModal');
+      switchTab('finance');
     }
 
     // Ctrl+K tezkor tugmasi
@@ -2248,20 +2484,294 @@
     }
 
     /* ========================================================
-       10.1 MOLIYA VA XARAJATLAR LOGIKASI
+       10.1 MOLIYA VA XARAJATLAR LOGIKASI (Oylik, Haftalik, Kunlik)
        ======================================================== */
+    let currentFinanceTypeFilter = 'all';
+
+    function setFinancePeriod(period) {
+      state.financePeriod = period;
+      saveState();
+      renderFinance();
+    }
+
+    function setFinanceTypeFilter(filter) {
+      currentFinanceTypeFilter = filter;
+      renderFinance();
+    }
+
+    function changeFinancePeriodDate(offset) {
+      const period = state.financePeriod || 'monthly';
+      if (period === 'monthly') {
+        const cur = state.financeMonth || getMonthString(new Date());
+        const [y, m] = cur.split('-').map(Number);
+        const d = new Date(y, m - 1 + offset, 1);
+        state.financeMonth = getMonthString(d);
+      } else if (period === 'weekly') {
+        const cur = state.financeWeek || getWeekString(new Date());
+        const [y, w] = cur.split('-W').map(Number);
+        const range = getWeekDateRange(y, w);
+        const nextD = new Date(range.start);
+        nextD.setDate(nextD.getDate() + offset * 7);
+        state.financeWeek = getWeekString(nextD);
+      } else {
+        // daily
+        const cur = state.financeDate || state.selectedDate || getTodayString();
+        const [y, m, dNum] = cur.split('-').map(Number);
+        const d = new Date(y, m - 1, dNum + offset);
+        state.financeDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+      saveState();
+      renderFinance();
+    }
+
+    function goFinancePeriodCurrent() {
+      const period = state.financePeriod || 'monthly';
+      if (period === 'monthly') state.financeMonth = getMonthString(new Date());
+      else if (period === 'weekly') state.financeWeek = getWeekString(new Date());
+      else state.financeDate = getTodayString();
+      saveState();
+      renderFinance();
+    }
+
+    function getFinanceTransactions() {
+      const period = state.financePeriod || 'monthly';
+      const items = [];
+      const fin = state.finance || {};
+
+      if (period === 'monthly') {
+        const targetMonth = state.financeMonth || getMonthString(new Date());
+        Object.entries(fin).forEach(([date, list]) => {
+          if (date.startsWith(targetMonth) && Array.isArray(list)) {
+            list.forEach(item => items.push({ ...item, date }));
+          }
+        });
+      } else if (period === 'weekly') {
+        const targetWeek = state.financeWeek || getWeekString(new Date());
+        Object.entries(fin).forEach(([date, list]) => {
+          const [y, m, d] = date.split('-').map(Number);
+          const weekStr = getWeekString(new Date(y, m - 1, d));
+          if (weekStr === targetWeek && Array.isArray(list)) {
+            list.forEach(item => items.push({ ...item, date }));
+          }
+        });
+      } else {
+        // daily
+        const targetDate = state.financeDate || state.selectedDate || getTodayString();
+        const list = fin[targetDate] || [];
+        if (Array.isArray(list)) {
+          list.forEach(item => items.push({ ...item, date: targetDate }));
+        }
+      }
+
+      return items.sort((a, b) => {
+        if (b.date !== a.date) return b.date.localeCompare(a.date);
+        return (b.id || 0) - (a.id || 0);
+      });
+    }
+
+    function renderFinance() {
+      const period = state.financePeriod || 'monthly';
+
+      // 1. Tab tugmalari ko'rinishi
+      ['monthly', 'weekly', 'daily'].forEach(p => {
+        const btn = document.getElementById(`finPeriod-${p}`);
+        if (btn) {
+          if (p === period) {
+            btn.className = 'px-2.5 py-1 rounded-lg bg-white text-emerald-800 shadow-xs transition';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg text-emerald-100 hover:text-white transition';
+          }
+        }
+      });
+
+      // 2. Navigatsiya sarlavhalari
+      const titleEl = document.getElementById('financePeriodTitle');
+      const subEl = document.getElementById('financePeriodSubtitle');
+      const curBtn = document.getElementById('financePeriodCurrentBtn');
+
+      if (period === 'monthly') {
+        const curM = state.financeMonth || getMonthString(new Date());
+        const [y, m] = curM.split('-').map(Number);
+        const d = new Date(y, m - 1, 1);
+        const mName = d.toLocaleDateString('uz-UZ', { month: 'long', year: 'numeric' });
+        const cap = mName.charAt(0).toUpperCase() + mName.slice(1);
+        const isCur = curM === getMonthString(new Date());
+
+        if (titleEl) titleEl.textContent = `${cap} ${isCur ? "(Joriy)" : ""}`;
+        if (subEl) subEl.textContent = `Oylik barcha xarajat va daromadlar hisoboti`;
+        if (curBtn) curBtn.textContent = 'Joriy oy';
+      } else if (period === 'weekly') {
+        const curW = state.financeWeek || getWeekString(new Date());
+        const [y, w] = curW.split('-W').map(Number);
+        const range = getWeekDateRange(y, w);
+        const isCur = curW === getWeekString(new Date());
+        const sStr = range.start.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
+        const eStr = range.end.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        if (titleEl) titleEl.textContent = `${w}-hafta ${isCur ? "(Joriy)" : ""}`;
+        if (subEl) subEl.textContent = `${sStr} — ${eStr}`;
+        if (curBtn) curBtn.textContent = 'Joriy hafta';
+      } else {
+        const curD = state.financeDate || state.selectedDate || getTodayString();
+        const [y, m, dNum] = curD.split('-').map(Number);
+        const d = new Date(y, m - 1, dNum);
+        const formatted = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const isCur = curD === getTodayString();
+
+        if (titleEl) titleEl.textContent = isCur ? "Bugun" : formatted.split(',')[0];
+        if (subEl) subEl.textContent = formatted;
+        if (curBtn) curBtn.textContent = 'Bugun';
+      }
+
+      // Sana kiritish maydoni (agar bo'sh bo'lsa bugungi sana)
+      const dateInp = document.getElementById('financeDateInput');
+      if (dateInp && !dateInp.value) {
+        dateInp.value = state.selectedDate || getTodayString();
+      }
+
+      // 3. Hisob-kitob (Tushum, Xarajat, Qoldiq)
+      const allPeriodItems = getFinanceTransactions();
+      let totalIncome = 0;
+      let totalExpense = 0;
+      const catTotals = {};
+
+      allPeriodItems.forEach(item => {
+        const amt = Number(item.amount) || 0;
+        if (item.type === 'income') {
+          totalIncome += amt;
+        } else {
+          totalExpense += amt;
+          const cat = item.category || 'other';
+          catTotals[cat] = (catTotals[cat] || 0) + amt;
+        }
+      });
+
+      const net = totalIncome - totalExpense;
+      const incEl = document.getElementById('financeTotalIncome');
+      const expEl = document.getElementById('financeTotalExpense');
+      const netEl = document.getElementById('financeNetBalance');
+      if (incEl) incEl.textContent = totalIncome.toLocaleString('uz-UZ') + " so'm";
+      if (expEl) expEl.textContent = totalExpense.toLocaleString('uz-UZ') + " so'm";
+      if (netEl) netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('uz-UZ') + " so'm";
+
+      // 4. Kategoriyalar bo'yicha taqsimot
+      const catBox = document.getElementById('financeCategoryBreakdown');
+      if (catBox) {
+        const catLabels = {
+          food: { name: 'Taom', icon: '🍔' },
+          transport: { name: 'Transport', icon: '🚕' },
+          shopping: { name: 'Xarid', icon: '🛍️' },
+          bills: { name: 'Kommunal', icon: '🏠' },
+          salary: { name: 'Maosh', icon: '💼' },
+          other: { name: 'Boshqa', icon: '📦' }
+        };
+
+        const activeCats = Object.entries(catTotals).filter(([_, val]) => val > 0);
+        if (activeCats.length > 0) {
+          catBox.classList.remove('hidden');
+          catBox.innerHTML = `
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
+              <span class="font-bold flex items-center gap-1"><span>📊</span> Xarajatlar taqsimoti:</span>
+              <span class="font-mono text-[11px]">Jami: ${totalExpense.toLocaleString('uz-UZ')} so'm</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              ${activeCats.map(([catKey, sum]) => {
+                const info = catLabels[catKey] || { name: catKey, icon: '📦' };
+                const percent = totalExpense > 0 ? Math.round((sum / totalExpense) * 100) : 0;
+                return `
+                  <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-1">
+                    <span class="truncate">${info.icon} ${info.name}:</span>
+                    <span class="font-bold font-mono text-red-600 dark:text-red-400 shrink-0">${sum.toLocaleString('uz-UZ')} (${percent}%)</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        } else {
+          catBox.classList.add('hidden');
+        }
+      }
+
+      // 5. Filtr va ro'yxatni ko'rsatish
+      ['all', 'expense', 'income'].forEach(f => {
+        const b = document.getElementById(`finTypeFilter-${f}`);
+        if (b) {
+          if (f === currentFinanceTypeFilter) {
+            b.className = 'px-2.5 py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs';
+          } else {
+            b.className = 'px-2.5 py-1 rounded-lg font-medium hover:text-slate-900 dark:hover:text-white';
+          }
+        }
+      });
+
+      let displayItems = allPeriodItems;
+      if (currentFinanceTypeFilter === 'expense') displayItems = allPeriodItems.filter(i => i.type === 'expense');
+      if (currentFinanceTypeFilter === 'income') displayItems = allPeriodItems.filter(i => i.type === 'income');
+
+      const countEl = document.getElementById('financeItemsCount');
+      if (countEl) countEl.textContent = `${displayItems.length} ta amal`;
+
+      const listEl = document.getElementById('financeList');
+      const emptyEl = document.getElementById('financeEmpty');
+      const emptyMsg = document.getElementById('financeEmptyMsg');
+
+      if (displayItems.length === 0) {
+        if (listEl) listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        if (emptyMsg) {
+          if (period === 'monthly') emptyMsg.textContent = "Ushbu oyda hech qanday xarajat yoki daromad kiritilmagan";
+          else if (period === 'weekly') emptyMsg.textContent = "Ushbu haftada hech qanday xarajat yoki daromad kiritilmagan";
+          else emptyMsg.textContent = "Ushbu kunga hech qanday xarajat yoki daromad kiritilmagan";
+        }
+      } else {
+        if (emptyEl) emptyEl.classList.add('hidden');
+        const catIcons = { food: '🍔', transport: '🚕', shopping: '🛍️', bills: '🏠', salary: '💼', other: '📦' };
+
+        if (listEl) {
+          listEl.innerHTML = displayItems.map(item => {
+            const [y, m, d] = (item.date || getTodayString()).split('-').map(Number);
+            const dateBadge = `${d}-${['yan','fev','mar','apr','may','iyun','iyul','avg','sen','okt','noy','dek'][m-1]}`;
+
+            return `
+              <div class="flex items-center justify-between p-3 rounded-2xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs hover:border-emerald-500/40 transition gap-2">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <span class="text-base p-1.5 rounded-xl bg-slate-100 dark:bg-slate-700 shrink-0">${catIcons[item.category] || '📦'}</span>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(item.desc)}</p>
+                    <div class="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-400">
+                      <span class="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 font-mono">${dateBadge}</span>
+                      <span class="capitalize">${item.type === 'income' ? '🟢 Tushum' : '🔴 Xarajat'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-xs font-mono font-bold ${item.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">
+                    ${item.type === 'income' ? '+' : '-'}${Number(item.amount).toLocaleString('uz-UZ')} so'm
+                  </span>
+                  <button onclick="deleteFinance(${item.id}, '${item.date}')" class="text-slate-400 hover:text-red-500 text-xs p-1" title="O'chirish">✕</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    }
+
     function handleFinanceSubmit(e) {
       e.preventDefault();
       const type = document.getElementById('financeType').value;
       const amount = Number(document.getElementById('financeAmount').value);
       const desc = document.getElementById('financeDesc').value.trim();
       const category = document.getElementById('financeCat').value;
+      const dateInput = document.getElementById('financeDateInput');
+      const dateVal = (dateInput && dateInput.value) ? dateInput.value : (state.selectedDate || getTodayString());
+
       if (!amount || !desc) return;
 
       if (!state.finance) state.finance = {};
-      if (!state.finance[state.selectedDate]) state.finance[state.selectedDate] = [];
+      if (!state.finance[dateVal]) state.finance[dateVal] = [];
 
-      state.finance[state.selectedDate].unshift({
+      state.finance[dateVal].unshift({
         id: Date.now(),
         type,
         amount,
@@ -2274,64 +2784,16 @@
       saveState();
       renderFinance();
       if (navigator.vibrate) navigator.vibrate(25);
+      showSyncToast("💾 Moliya amali qo'shildi!");
     }
 
-    function deleteFinance(id) {
-      if (!state.finance || !state.finance[state.selectedDate]) return;
-      state.finance[state.selectedDate] = state.finance[state.selectedDate].filter(f => f.id !== id);
+    function deleteFinance(id, dateVal) {
+      const d = dateVal || state.selectedDate || getTodayString();
+      if (!state.finance || !state.finance[d]) return;
+      state.finance[d] = state.finance[d].filter(f => f.id !== id);
       saveState();
       renderFinance();
-    }
-
-    function renderFinance() {
-      const parts = state.selectedDate.split('-').map(Number);
-      const d = new Date(parts[0], parts[1] - 1, parts[2]);
-      const dateFormatted = d.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      const sub = document.getElementById('financeDateSubtitle');
-      if (sub) sub.textContent = `${dateFormatted} — hisob-kitobi`;
-
-      const list = (state.finance && state.finance[state.selectedDate]) || [];
-      let income = 0;
-      let expense = 0;
-
-      list.forEach(item => {
-        if (item.type === 'income') income += Number(item.amount) || 0;
-        else expense += Number(item.amount) || 0;
-      });
-
-      const net = income - expense;
-      document.getElementById('financeTotalIncome').textContent = income.toLocaleString('uz-UZ') + " so'm";
-      document.getElementById('financeTotalExpense').textContent = expense.toLocaleString('uz-UZ') + " so'm";
-      document.getElementById('financeNetBalance').textContent = (net >= 0 ? '+' : '') + net.toLocaleString('uz-UZ') + " so'm";
-
-      const listEl = document.getElementById('financeList');
-      const emptyEl = document.getElementById('financeEmpty');
-
-      if (list.length === 0) {
-        listEl.innerHTML = '';
-        emptyEl.classList.remove('hidden');
-      } else {
-        emptyEl.classList.add('hidden');
-        const catIcons = { food: '🍔', transport: '🚕', shopping: '🛍️', bills: '🏠', salary: '💼', other: '📦' };
-
-        listEl.innerHTML = list.map(item => `
-          <div class="flex items-center justify-between p-3 rounded-2xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-xs">
-            <div class="flex items-center gap-2.5 min-w-0 flex-1">
-              <span class="text-base p-1.5 rounded-xl bg-slate-100 dark:bg-slate-700">${catIcons[item.category] || '📦'}</span>
-              <div class="min-w-0">
-                <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(item.desc)}</p>
-                <p class="text-[10px] text-slate-400 capitalize">${item.type === 'income' ? 'Tushum' : 'Xarajat'}</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold ${item.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}">
-                ${item.type === 'income' ? '+' : '-'}${Number(item.amount).toLocaleString('uz-UZ')} so'm
-              </span>
-              <button onclick="deleteFinance(${item.id})" class="text-slate-400 hover:text-red-500 text-xs p-1">✕</button>
-            </div>
-          </div>
-        `).join('');
-      }
+      showSyncToast("Amal o'chirildi");
     }
 
     /* ========================================================
@@ -2708,6 +3170,21 @@
       }
     }
 
+    function ensureWeeklyRollover() {
+      if (!state.weekly) state.weekly = {};
+      const curWeek = getWeekString(new Date());
+      if (!state.weekly[curWeek] || state.weekly[curWeek].length === 0) {
+        const [y, w] = curWeek.split('-W').map(Number);
+        const range = getWeekDateRange(y, w);
+        const prevD = new Date(range.start);
+        prevD.setDate(prevD.getDate() - 7);
+        const prevWeek = getWeekString(prevD);
+        if (state.weekly[prevWeek] && state.weekly[prevWeek].length > 0) {
+          state.weekly[curWeek] = JSON.parse(JSON.stringify(state.weekly[prevWeek]));
+        }
+      }
+    }
+
     // 2. Real-time qabul qilish (SSE - Server-Sent Events)
     function connectRealtimeSSE() {
       if (sseClient) {
@@ -2718,15 +3195,25 @@
         sseClient.onopen = () => {
           setSyncIndicator('success');
         };
-        sseClient.onmessage = (event) => {
+        sseClient.onmessage = async (event) => {
           try {
             const ntfyMsg = JSON.parse(event.data);
             if (ntfyMsg.event === 'message') {
-              const payload = JSON.parse(ntfyMsg.message);
+              let payload = null;
+              if (ntfyMsg.attachment && ntfyMsg.attachment.url) {
+                try {
+                  const res = await fetch(ntfyMsg.attachment.url);
+                  payload = await res.json();
+                } catch (e) {}
+              } else if (ntfyMsg.message) {
+                try { payload = JSON.parse(ntfyMsg.message); } catch (e) {}
+              }
+
               if (payload && payload.senderId !== myDeviceId && payload.state) {
                 if (!payload.timestamp || payload.timestamp > lastReceivedTimestamp) {
                   lastReceivedTimestamp = payload.timestamp || Date.now();
                   state = { ...defaultState, ...payload.state };
+                  ensureWeeklyRollover();
                   saveLocalOnly();
                   renderCurrentTab();
                   showSyncToast('⚡ Qurilmalar sinxronlandi!');
@@ -2763,17 +3250,25 @@
           const lines = text.trim().split('\n').filter(Boolean);
           if (lines.length > 0) {
             const lastItem = JSON.parse(lines[lines.length - 1]);
-            if (lastItem && lastItem.message) {
-              const payload = JSON.parse(lastItem.message);
-              if (payload && payload.state) {
-                const remoteCount = countTotalTasks(payload.state);
-                if (remoteCount >= localCount && remoteCount > 0) {
-                  state = { ...defaultState, ...payload.state };
-                  saveLocalOnly();
-                  renderCurrentTab();
-                  setSyncIndicator('success');
-                  return;
-                }
+            let payload = null;
+            if (lastItem && lastItem.attachment && lastItem.attachment.url) {
+              try {
+                const res = await fetch(lastItem.attachment.url);
+                payload = await res.json();
+              } catch (e) {}
+            } else if (lastItem && lastItem.message) {
+              try { payload = JSON.parse(lastItem.message); } catch (e) {}
+            }
+
+            if (payload && payload.state) {
+              const remoteCount = countTotalTasks(payload.state);
+              if (remoteCount >= localCount && remoteCount > 0) {
+                state = { ...defaultState, ...payload.state };
+                ensureWeeklyRollover();
+                saveLocalOnly();
+                renderCurrentTab();
+                setSyncIndicator('success');
+                return;
               }
             }
           }

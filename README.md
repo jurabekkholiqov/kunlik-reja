@@ -17,14 +17,21 @@ RejaPro — shaxsiy va professional maqsadlarga erishish uchun mo'ljallangan ken
 
 2. 📆 **Haftalik Reja (Weekly Sprint):**
    - Hafta davomida bajarilishi lozim bo'lgan eng muhim maqsadlar.
-   - Hafta bo'yicha progress hisoblagichi.
+   - Haftalar bo'yicha navigatsiya (Oldingi hafta ◀, Joriy hafta, Keyingi hafta ▶).
+   - Yangi hafta boshlanganda o'tgan haftadagi faol rejalarni avtomatik ko'chirish va saqlash.
 
 3. 🗓️ **Oylik Marralar (Monthly Goals):**
-   - Joriy oy uchun katta marralar va topshiriqlar.
+   - Har bir oy uchun alohida marralar va oylar bo'yicha qulay navigatsiya (◀ Oktyabr, Noyabr, Dekabr ▶).
 
 4. 🎯 **Yillik Strategik Maqsadlar (Yearly Vision):**
    - Yil davomidagi global rejalar (Masalan: Chet tili, Yangi kasb, Avtomobil, Investitsiya).
    - Har bir maqsad uchun **Progress Slayderi (0% dan 100% gacha)**.
+
+5. 💰 **Moliya & Xarajatlar (Oylik, Haftalik, Kunlik):**
+   - Oylik mustaqil hisob-kitob (Oktyabr alohida, Noyabr alohida va barcha oylar).
+   - Haftalik va kunlik ko'rinishlarga bir zumda o'tish imkoniyati.
+   - Xarajatlar toifalari bo'yicha foizli va vizual taqsimot (Taom, Transport, Xarid, Kommunal, Maosh).
+   - Har bir operatsiyaga aniq sana biriktirish va filtrlar (Hammasi, Xarajat, Daromad).
 
 5. ⚡ **Odatlar Trekeri (Habit Tracker):**
    - Kundalik foydali odatlar (Kitob o'qish, Sport, Suv ichish).
