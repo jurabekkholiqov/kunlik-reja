@@ -1533,12 +1533,24 @@
 
     function toggleDailyTodo(id) {
       const list = state.daily[state.selectedDate] || [];
-      const item = list.find(t => t.id === id);
-      if (item) {
+      const idx = list.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        const item = list[idx];
         item.completed = !item.completed;
+        list.splice(idx, 1);
         if (item.completed) {
           playBeep(600, 0.08);
           if (navigator.vibrate) navigator.vibrate(35);
+          // Bajarilgan vazifa birdan ro'yxatning eng oxiriga (pastga) tushadi
+          list.push(item);
+        } else {
+          // Bajarilmagan holatga qaytarilganda, bajarilganlar tepasiga (faol vazifalar oxiriga) qo'yiladi
+          const firstDoneIdx = list.findIndex(t => t.completed);
+          if (firstDoneIdx !== -1) {
+            list.splice(firstDoneIdx, 0, item);
+          } else {
+            list.push(item);
+          }
         }
       }
       saveState();
@@ -1640,7 +1652,13 @@
         else dailyResetBtn.classList.remove('hidden');
       }
 
-      const list = state.daily[state.selectedDate] || [];
+      const rawList = state.daily[state.selectedDate] || [];
+      // Har doim faol (bajarilmagan) vazifalar tepada, bajarilganlar esa pastda turishi
+      const uncompleted = rawList.filter(t => !t.completed);
+      const completed = rawList.filter(t => t.completed);
+      const list = [...uncompleted, ...completed];
+      state.daily[state.selectedDate] = list;
+
       const total = list.length;
       const completedCount = list.filter(t => t.completed).length;
       const percent = total === 0 ? 0 : Math.round((completedCount / total) * 100);
@@ -1919,8 +1937,24 @@
     function toggleWeekly(id) {
       const targetWeek = state.selectedWeek || getWeekString(new Date());
       const list = state.weekly[targetWeek] || [];
-      const item = list.find(t => t.id === id);
-      if (item) item.completed = !item.completed;
+      const idx = list.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        const item = list[idx];
+        item.completed = !item.completed;
+        list.splice(idx, 1);
+        if (item.completed) {
+          playBeep(600, 0.08);
+          if (navigator.vibrate) navigator.vibrate(35);
+          list.push(item);
+        } else {
+          const firstDoneIdx = list.findIndex(t => t.completed);
+          if (firstDoneIdx !== -1) {
+            list.splice(firstDoneIdx, 0, item);
+          } else {
+            list.push(item);
+          }
+        }
+      }
       saveState();
       renderWeekly();
     }
@@ -1955,7 +1989,12 @@
         else weekResetBtn.classList.remove('hidden');
       }
 
-      const list = state.weekly[targetWeek] || [];
+      const rawList = state.weekly[targetWeek] || [];
+      const uncompleted = rawList.filter(t => !t.completed);
+      const completed = rawList.filter(t => t.completed);
+      const list = [...uncompleted, ...completed];
+      state.weekly[targetWeek] = list;
+
       const total = list.length;
       const done = list.filter(t => t.completed).length;
       const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -2019,8 +2058,24 @@
     function toggleMonthly(id) {
       const targetMonth = state.selectedMonth || getMonthString(new Date());
       const list = state.monthly[targetMonth] || [];
-      const item = list.find(t => t.id === id);
-      if (item) item.completed = !item.completed;
+      const idx = list.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        const item = list[idx];
+        item.completed = !item.completed;
+        list.splice(idx, 1);
+        if (item.completed) {
+          playBeep(600, 0.08);
+          if (navigator.vibrate) navigator.vibrate(35);
+          list.push(item);
+        } else {
+          const firstDoneIdx = list.findIndex(t => t.completed);
+          if (firstDoneIdx !== -1) {
+            list.splice(firstDoneIdx, 0, item);
+          } else {
+            list.push(item);
+          }
+        }
+      }
       saveState();
       renderMonthly();
     }
@@ -2054,7 +2109,12 @@
         else mResetBtn.classList.remove('hidden');
       }
 
-      const list = state.monthly[targetMonth] || [];
+      const rawList = state.monthly[targetMonth] || [];
+      const uncompleted = rawList.filter(t => !t.completed);
+      const completed = rawList.filter(t => t.completed);
+      const list = [...uncompleted, ...completed];
+      state.monthly[targetMonth] = list;
+
       const total = list.length;
       const done = list.filter(t => t.completed).length;
       const pct = total === 0 ? 0 : Math.round((done / total) * 100);

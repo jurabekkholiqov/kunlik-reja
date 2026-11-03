@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rejapro-v12-mobile-ergonomics';
+const CACHE_NAME = 'rejapro-v13-auto-sort-completed';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
