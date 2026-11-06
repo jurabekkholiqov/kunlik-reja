@@ -576,7 +576,10 @@
             <option value="income">🟢 Daromad</option>
           </select>
           <input type="number" id="financeAmount" placeholder="Summa (masalan: 35000)" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500 font-mono min-w-[130px]" required />
-          <input type="date" id="financeDateInput" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-700 dark:text-slate-300 outline-none font-mono" />
+          <div class="flex items-center gap-1">
+            <input type="date" id="financeDateInput" onchange="this.dataset.manual='true'" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-700 dark:text-slate-300 outline-none font-mono" title="Amal sanasi" />
+            <button type="button" onclick="setFinanceInputToday()" class="text-[11px] px-2 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition whitespace-nowrap active:scale-95" title="Bugungi sanaga qaytarish">Bugun</button>
+          </div>
         </div>
         <div class="flex gap-2">
           <input type="text" id="financeDesc" placeholder="Izoh (masalan: Bozorlik, Tushlik, Yo'l kira, Maosh)..." class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-emerald-500" required />
@@ -1094,6 +1097,15 @@
         }
       } catch (e) {}
 
+      if (loaded) {
+        const today = getTodayString();
+        // Har safar ilova yangi ochilganda avtomatik joriy bugungi kunga o'rnatiladi
+        loaded.selectedDate = today;
+        loaded.financeDate = today;
+        loaded.financeMonth = getMonthString(new Date());
+        loaded.financeWeek = getWeekString(new Date());
+      }
+
       if (!loaded) {
         // Dastlabki demo ma'lumotlar bilan to'ldirish
         const today = getTodayString();
@@ -1279,6 +1291,14 @@
 
       // 2. Pastki mobil ergonomik navigatsiya yangilanishi
       updateMobileBottomNav(tabName);
+
+      if (tabName === 'finance') {
+        const dateInp = document.getElementById('financeDateInput');
+        if (dateInp) {
+          dateInp.value = getTodayString();
+          delete dateInp.dataset.manual;
+        }
+      }
 
       renderCurrentTab();
     }
@@ -2967,10 +2987,12 @@
         else curBtn.classList.remove('hidden');
       }
 
-      // Sana kiritish maydoni (agar bo'sh bo'lsa bugungi sana)
+      // Sana kiritish maydoni (har doim bugungi sana chiqib turishi kerak)
       const dateInp = document.getElementById('financeDateInput');
-      if (dateInp && !dateInp.value) {
-        dateInp.value = state.selectedDate || getTodayString();
+      if (dateInp) {
+        if (!dateInp.value || !dateInp.dataset.manual) {
+          dateInp.value = getTodayString();
+        }
       }
 
       // 3. Hisob-kitob (Tushum, Xarajat, Qoldiq)
@@ -3108,7 +3130,7 @@
       const desc = document.getElementById('financeDesc').value.trim();
       const category = document.getElementById('financeCat').value;
       const dateInput = document.getElementById('financeDateInput');
-      const dateVal = (dateInput && dateInput.value) ? dateInput.value : (state.selectedDate || getTodayString());
+      const dateVal = (dateInput && dateInput.value) ? dateInput.value : getTodayString();
 
       if (!amount || !desc) return;
 
@@ -3120,15 +3142,30 @@
         type,
         amount,
         desc,
-        category
+        category,
+        updatedAt: Date.now()
       });
 
       document.getElementById('financeAmount').value = '';
       document.getElementById('financeDesc').value = '';
+      if (dateInput) {
+        dateInput.value = getTodayString();
+        delete dateInput.dataset.manual;
+      }
       saveState();
       renderFinance();
       if (navigator.vibrate) navigator.vibrate(25);
       showSyncToast("💾 Moliya amali qo'shildi!");
+    }
+
+    function setFinanceInputToday() {
+      const dateInp = document.getElementById('financeDateInput');
+      if (dateInp) {
+        dateInp.value = getTodayString();
+        delete dateInp.dataset.manual;
+        if (navigator.vibrate) navigator.vibrate(20);
+        showSyncToast("📅 Sana bugunga (" + formatUzDay(new Date()) + ") o'rnatildi");
+      }
     }
 
     function deleteFinance(id, dateVal) {

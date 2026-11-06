@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rejapro-v14-robust-sync-merger';
+const CACHE_NAME = 'rejapro-v15-auto-finance-date';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
