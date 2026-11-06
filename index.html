@@ -851,38 +851,42 @@
     <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
         <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-          <span>🔄</span> Telefonga Ulash & Ko'chirish
+          <span>🔄</span> Real-time Sinxronizatsiya
         </h3>
         <button onclick="closeModal('syncModal')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
 
-      <p class="text-xs text-slate-500 dark:text-slate-400">
-        Saytdagi barcha 6 ta va keyingi barcha vazifalaringiz telefoningizda ham bir xil chiqishi uchun quyidagi usullardan birini tanlang:
-      </p>
+      <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 text-xs space-y-1">
+        <div class="flex items-center justify-between font-bold text-emerald-800 dark:text-emerald-300">
+          <span class="flex items-center gap-1.5"><span id="syncModalDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Jonli sinxron ulandi</span>
+          <span id="syncModalTime" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">Hozir faol</span>
+        </div>
+        <p class="text-[11px] text-slate-600 dark:text-slate-300">Telefon va noutbukdagi barcha rejalar yo'qolmasdan, real vaqtda ikki tomonlama birlashtiriladi.</p>
+      </div>
 
-      <!-- 1-usul: QR Kod (To'g'ridan-to'g'ri ko'chirish) -->
-      <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-center space-y-2 border border-emerald-200 dark:border-emerald-800/60">
-        <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">1-usul: QR Kodni telefon kamerasi bilan o'qing</p>
+      <!-- Hoziroq yangilash tugmasi -->
+      <button onclick="forceCloudSync()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs py-3 px-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+        <span>🔄</span> Hoziroq Sinxronlash (Yangilash)
+      </button>
+
+      <!-- 1-usul: QR Kod (Telefonda ochish) -->
+      <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 text-center space-y-2 border border-slate-200 dark:border-slate-700">
+        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">1-usul: QR Kodni telefon kamerasi bilan oching</p>
         <div class="flex justify-center p-2.5 bg-white rounded-2xl max-w-[170px] mx-auto shadow-md">
           <img id="syncQrImg" src="" alt="QR Kod" class="w-36 h-36 object-contain" />
         </div>
-        <p class="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">Telefoningiz kamerasini yaqinlashtiring — barcha 6 ta vazifa bir zumda telefoningizda ochiladi!</p>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400">Telefon kamerasini yaqinlashtirsangiz, barcha vazifalar darhol telefoningizda ochiladi va ulanadi.</p>
       </div>
 
       <!-- 2-usul: Telegram orqali telefoningizga yuborish -->
       <button onclick="sendToTelegram()" class="w-full bg-blue-500 hover:bg-blue-600 active:scale-95 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2">
-        <span>✈️</span> Telegram orqali telefonimga yuborish
+        <span>✈️</span> Telegram orqali telefonimga havola yuborish
       </button>
 
       <!-- 3-usul: Havolani nusxalash -->
-      <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex gap-2">
-        <button onclick="copyDirectImportLink()" class="flex-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1">
-          <span>📋</span> Havolani nusxalash
-        </button>
-        <button onclick="forceCloudSync()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1">
-          <span>☁️</span> Bulutga saqlash
-        </button>
-      </div>
+      <button onclick="copyDirectImportLink()" class="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center gap-1">
+        <span>📋</span> Sinxron havolasini nusxalash
+      </button>
     </div>
   </div>
 
@@ -1537,6 +1541,7 @@
       if (idx !== -1) {
         const item = list[idx];
         item.completed = !item.completed;
+        item.updatedAt = Date.now();
         list.splice(idx, 1);
         if (item.completed) {
           playBeep(600, 0.08);
@@ -1574,6 +1579,9 @@
         index: idx
       };
 
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
+
       state.daily[state.selectedDate] = list.filter(t => t.id !== id);
       saveState();
       renderDaily();
@@ -1606,6 +1614,11 @@
       const { task, date, index } = lastDeletedTask;
       if (!state.daily[date]) state.daily[date] = [];
 
+      if (state.deletedIds && task.id) {
+        delete state.deletedIds[task.id];
+      }
+      task.updatedAt = Date.now();
+
       if (index >= 0 && index <= state.daily[date].length) {
         state.daily[date].splice(index, 0, task);
       } else {
@@ -1625,6 +1638,10 @@
       const completed = list.filter(t => t.completed);
       if (completed.length === 0) return;
       if (confirm("Ushbu kundagi barcha bajarilgan vazifalar o'chirilsinmi?")) {
+        state.deletedIds = state.deletedIds || {};
+        completed.forEach(t => {
+          if (t.id) state.deletedIds[t.id] = Date.now();
+        });
         state.daily[state.selectedDate] = list.filter(t => !t.completed);
         saveState();
         renderDaily();
@@ -1941,6 +1958,7 @@
       if (idx !== -1) {
         const item = list[idx];
         item.completed = !item.completed;
+        item.updatedAt = Date.now();
         list.splice(idx, 1);
         if (item.completed) {
           playBeep(600, 0.08);
@@ -1962,6 +1980,8 @@
     function deleteWeekly(id) {
       const targetWeek = state.selectedWeek || getWeekString(new Date());
       if (!state.weekly[targetWeek]) return;
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
       state.weekly[targetWeek] = state.weekly[targetWeek].filter(t => t.id !== id);
       saveState();
       renderWeekly();
@@ -2062,6 +2082,7 @@
       if (idx !== -1) {
         const item = list[idx];
         item.completed = !item.completed;
+        item.updatedAt = Date.now();
         list.splice(idx, 1);
         if (item.completed) {
           playBeep(600, 0.08);
@@ -2083,6 +2104,8 @@
     function deleteMonthly(id) {
       const targetMonth = state.selectedMonth || getMonthString(new Date());
       if (!state.monthly[targetMonth]) return;
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
       state.monthly[targetMonth] = state.monthly[targetMonth].filter(t => t.id !== id);
       saveState();
       renderMonthly();
@@ -2210,6 +2233,8 @@
     function deleteYearly(id) {
       const currentYear = String(new Date().getFullYear());
       if (!state.yearly[currentYear]) return;
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
       state.yearly[currentYear] = state.yearly[currentYear].filter(t => t.id !== id);
       saveState();
       renderYearly();
@@ -2295,6 +2320,8 @@
 
     function deleteHabit(id) {
       if (confirm("Bu odatni o'chirmoqchimisiz?")) {
+        state.deletedIds = state.deletedIds || {};
+        state.deletedIds[id] = Date.now();
         state.habits = state.habits.filter(h => h.id !== id);
         saveState();
         renderHabits();
@@ -2402,6 +2429,8 @@
 
     function deleteNote(id) {
       if (!state.notes) return;
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
       state.notes = state.notes.filter(n => n.id !== id);
       saveState();
       renderNotes();
@@ -3105,6 +3134,8 @@
     function deleteFinance(id, dateVal) {
       const d = dateVal || state.selectedDate || getTodayString();
       if (!state.finance || !state.finance[d]) return;
+      state.deletedIds = state.deletedIds || {};
+      state.deletedIds[id] = Date.now();
       state.finance[d] = state.finance[d].filter(f => f.id !== id);
       saveState();
       renderFinance();
@@ -3386,7 +3417,7 @@
     });
 
     /* ========================================================
-       15. REAL-TIME MULTI-DEVICE BIDIRECTIONAL SYNCHRONIZATION
+       15. REAL-TIME BULUTLI VA QURILMALARARO SINXRONIZATSIYA
        ======================================================== */
     const DEFAULT_TOPIC = 'reja_jurabek_kholiqov_2026';
     let syncTopic = localStorage.getItem('rejapro_sync_topic') || DEFAULT_TOPIC;
@@ -3399,19 +3430,172 @@
     let syncTimeout = null;
     let sseClient = null;
     let lastReceivedTimestamp = 0;
+    let lastSyncTime = null;
 
-    function countTotalTasks(obj) {
-      if (!obj) return 0;
-      let count = 0;
-      if (obj.daily) {
-        Object.values(obj.daily).forEach(list => {
-          if (Array.isArray(list)) count += list.length;
+    // 0. Siqish (Compress / Decompress) — Ntfy 4KB inline cheklovidan o'tish uchun
+    async function compressString(str) {
+      if (typeof CompressionStream === 'function') {
+        try {
+          const cs = new CompressionStream('deflate');
+          const writer = cs.writable.getWriter();
+          writer.write(new TextEncoder().encode(str));
+          writer.close();
+          const buf = await new Response(cs.readable).arrayBuffer();
+          let binary = '';
+          const bytes = new Uint8Array(buf);
+          const len = bytes.byteLength;
+          for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          return 'gz:' + btoa(binary);
+        } catch (e) {
+          console.warn('Compression fallback to raw:', e);
+        }
+      }
+      return str;
+    }
+
+    async function decompressString(str) {
+      if (typeof str === 'string' && str.startsWith('gz:')) {
+        if (typeof DecompressionStream === 'function') {
+          try {
+            const b64 = str.slice(3);
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+            const ds = new DecompressionStream('deflate');
+            const writer = ds.writable.getWriter();
+            writer.write(bytes);
+            writer.close();
+            return await new Response(ds.readable).text();
+          } catch (e) {
+            console.warn('Decompression error:', e);
+          }
+        }
+      }
+      return str;
+    }
+
+    // 1. Chuqur va yo'qotishlarsiz holat birlashtiruvchi (Deep Non-Destructive Merger)
+    function mergeStates(local, remote) {
+      if (!remote || typeof remote !== 'object') return local;
+      if (!local || typeof local !== 'object') return remote;
+
+      const merged = { ...local };
+
+      // O'chirilgan ID lar ro'yxatini birlashtirish va 30 kundan eskilarni tozalash
+      const deletedIds = { ...(local.deletedIds || {}), ...(remote.deletedIds || {}) };
+      const now = Date.now();
+      for (const id in deletedIds) {
+        if (now - deletedIds[id] > 30 * 86400000) delete deletedIds[id];
+      }
+      merged.deletedIds = deletedIds;
+
+      function mergeArrayById(locArr, remArr, keyField = 'id', compareField = 'updatedAt') {
+        const map = new Map();
+        (locArr || []).forEach(item => {
+          if (!item) return;
+          const id = item[keyField];
+          if (id && deletedIds[id] && (!item[compareField] || item[compareField] <= deletedIds[id])) return;
+          map.set(id != null ? String(id) : JSON.stringify(item), { ...item });
         });
+
+        (remArr || []).forEach(item => {
+          if (!item) return;
+          const id = item[keyField];
+          if (id && deletedIds[id] && (!item[compareField] || item[compareField] <= deletedIds[id])) return;
+          const key = id != null ? String(id) : JSON.stringify(item);
+          if (!map.has(key)) {
+            map.set(key, { ...item });
+          } else {
+            const existing = map.get(key);
+            const remTime = item[compareField] || 0;
+            const locTime = existing[compareField] || 0;
+            // Agar remote yangiroq bo'lsa yoki bittasida bajarilgan bo'lsa
+            if (remTime > locTime || (item.completed && !existing.completed)) {
+              map.set(key, { ...existing, ...item });
+            }
+          }
+        });
+        return Array.from(map.values());
       }
-      if (obj.notes && Array.isArray(obj.notes)) {
-        count += obj.notes.length;
-      }
-      return count;
+
+      // Kunlik rejalar (daily) — Har bir kun sanasi bo'yicha to'liq birlashtirish
+      merged.daily = { ...(local.daily || {}) };
+      const allDates = new Set([...Object.keys(local.daily || {}), ...Object.keys(remote.daily || {})]);
+      allDates.forEach(date => {
+        const locList = (local.daily && local.daily[date]) || [];
+        const remList = (remote.daily && remote.daily[date]) || [];
+        const mergedList = mergeArrayById(locList, remList);
+        const uncompleted = mergedList.filter(t => !t.completed);
+        const completed = mergedList.filter(t => t.completed);
+        merged.daily[date] = [...uncompleted, ...completed];
+      });
+
+      // Haftalik maqsadlar (weekly)
+      merged.weekly = { ...(local.weekly || {}) };
+      const allWeeks = new Set([...Object.keys(local.weekly || {}), ...Object.keys(remote.weekly || {})]);
+      allWeeks.forEach(w => {
+        merged.weekly[w] = mergeArrayById((local.weekly && local.weekly[w]) || [], (remote.weekly && remote.weekly[w]) || []);
+      });
+
+      // Oylik maqsadlar (monthly)
+      merged.monthly = { ...(local.monthly || {}) };
+      const allMonths = new Set([...Object.keys(local.monthly || {}), ...Object.keys(remote.monthly || {})]);
+      allMonths.forEach(m => {
+        merged.monthly[m] = mergeArrayById((local.monthly && local.monthly[m]) || [], (remote.monthly && remote.monthly[m]) || []);
+      });
+
+      // Yillik maqsadlar (yearly)
+      merged.yearly = { ...(local.yearly || {}) };
+      const allYears = new Set([...Object.keys(local.yearly || {}), ...Object.keys(remote.yearly || {})]);
+      allYears.forEach(y => {
+        merged.yearly[y] = mergeArrayById((local.yearly && local.yearly[y]) || [], (remote.yearly && remote.yearly[y]) || []);
+      });
+
+      // Odatlar (habits) — Bajarilgan kunlarni (streak) birlashtirish
+      const habitMap = new Map();
+      (local.habits || []).forEach(h => habitMap.set(String(h.id), { ...h }));
+      (remote.habits || []).forEach(h => {
+        const key = String(h.id);
+        if (!habitMap.has(key)) {
+          habitMap.set(key, { ...h });
+        } else {
+          const existing = habitMap.get(key);
+          const dates = { ...(existing.completedDates || {}), ...(h.completedDates || {}) };
+          habitMap.set(key, { ...existing, ...h, completedDates: dates });
+        }
+      });
+      merged.habits = Array.from(habitMap.values());
+
+      // Qaydlar (notes)
+      merged.notes = mergeArrayById(local.notes, remote.notes);
+
+      // Moliya (finance) — barcha daromad va xarajatlar saqlanadi
+      merged.finance = { ...(local.finance || {}) };
+      const finDates = new Set([...Object.keys(local.finance || {}), ...Object.keys(remote.finance || {})]);
+      finDates.forEach(d => {
+        merged.finance[d] = mergeArrayById((local.finance && local.finance[d]) || [], (remote.finance && remote.finance[d]) || []);
+      });
+
+      return merged;
+    }
+
+    function prepareSyncState(fullState) {
+      if (!fullState) return {};
+      return {
+        timestamp: Date.now(),
+        deletedIds: fullState.deletedIds || {},
+        daily: fullState.daily || {},
+        weekly: fullState.weekly || {},
+        monthly: fullState.monthly || {},
+        yearly: fullState.yearly || {},
+        habits: fullState.habits || [],
+        notes: fullState.notes || [],
+        finance: fullState.finance || {}
+      };
     }
 
     function setSyncIndicator(status) {
@@ -3434,12 +3618,21 @@
       }
     }
 
+    function updateSyncModalUI() {
+      const modalDot = document.getElementById('syncModalDot');
+      const modalTime = document.getElementById('syncModalTime');
+      if (modalDot) modalDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+      if (modalTime && lastSyncTime) {
+        modalTime.textContent = new Date(lastSyncTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' sinxron';
+      }
+    }
+
     function showSyncToast(msg) {
       let toast = document.getElementById('syncToast');
       if (!toast) {
         toast = document.createElement('div');
         toast.id = 'syncToast';
-        toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg z-50 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2';
+        toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg z-50 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-2';
         document.body.appendChild(toast);
       }
       toast.textContent = msg;
@@ -3451,22 +3644,27 @@
       }, 2500);
     }
 
-    // 1. O'zgarishlarni real vaqtda uzatish (PUSH)
+    // 2. O'zgarishlarni real vaqtda uzatish (PUSH)
     function pushToSyncDebounced() {
       clearTimeout(syncTimeout);
       syncTimeout = setTimeout(() => {
         pushToSync();
-      }, 300);
+      }, 350);
     }
 
     async function pushToSync() {
       setSyncIndicator('loading');
       try {
+        const syncState = prepareSyncState(state);
+        const jsonStr = JSON.stringify(syncState);
+        const compressed = await compressString(jsonStr);
+
         const payload = {
           senderId: myDeviceId,
           timestamp: Date.now(),
-          state: state
+          data: compressed
         };
+
         const res = await fetch(`https://ntfy.sh/${syncTopic}`, {
           method: 'POST',
           headers: {
@@ -3475,8 +3673,11 @@
           },
           body: JSON.stringify(payload)
         });
+
         if (res.ok) {
           setSyncIndicator('success');
+          lastSyncTime = Date.now();
+          updateSyncModalUI();
         } else {
           setSyncIndicator('error');
         }
@@ -3500,7 +3701,42 @@
       }
     }
 
-    // 2. Real-time qabul qilish (SSE - Server-Sent Events)
+    // 3. Kelgan ma'lumotni qabul qilib, mahalliy holatga xavfsiz birlashtirish
+    async function handleIncomingSyncPayload(payload) {
+      if (!payload || !payload.senderId || payload.senderId === myDeviceId) {
+        return false;
+      }
+
+      let remoteState = null;
+      if (payload.data) {
+        try {
+          const jsonStr = await decompressString(payload.data);
+          remoteState = JSON.parse(jsonStr);
+        } catch (e) {}
+      } else if (payload.state) {
+        // Eski formatdagi siqilmagan xabarlarni ham qo'llab-quvvatlash
+        remoteState = payload.state;
+      }
+
+      if (remoteState && typeof remoteState === 'object') {
+        const beforeJson = JSON.stringify(state);
+        state = mergeStates(state, remoteState);
+        ensureWeeklyRollover();
+        saveLocalOnly();
+
+        if (JSON.stringify(state) !== beforeJson) {
+          renderCurrentTab();
+          showSyncToast('⚡ Yangi rejalar sinxronlandi!');
+        }
+        setSyncIndicator('success');
+        lastSyncTime = Date.now();
+        updateSyncModalUI();
+        return true;
+      }
+      return false;
+    }
+
+    // 4. Real-time qabul qilish (SSE - Server-Sent Events)
     function connectRealtimeSSE() {
       if (sseClient) {
         try { sseClient.close(); } catch (e) {}
@@ -3518,22 +3754,14 @@
               if (ntfyMsg.attachment && ntfyMsg.attachment.url) {
                 try {
                   const res = await fetch(ntfyMsg.attachment.url);
-                  payload = await res.json();
+                  if (res.ok) payload = await res.json();
                 } catch (e) {}
               } else if (ntfyMsg.message) {
                 try { payload = JSON.parse(ntfyMsg.message); } catch (e) {}
               }
 
-              if (payload && payload.senderId !== myDeviceId && payload.state) {
-                if (!payload.timestamp || payload.timestamp > lastReceivedTimestamp) {
-                  lastReceivedTimestamp = payload.timestamp || Date.now();
-                  state = { ...defaultState, ...payload.state };
-                  ensureWeeklyRollover();
-                  saveLocalOnly();
-                  renderCurrentTab();
-                  showSyncToast('⚡ Qurilmalar sinxronlandi!');
-                  setSyncIndicator('success');
-                }
+              if (payload) {
+                await handleIncomingSyncPayload(payload);
               }
             }
           } catch (e) {}
@@ -3544,7 +3772,45 @@
       } catch (e) {}
     }
 
-    // 3. Dastlabki yuklanishda so'nggi holatni olish (Poll)
+    // 5. Bulutdagi barcha xabarlarni tortib, to'liq birlashtirish (Poll)
+    async function pollAndMergeCloud() {
+      setSyncIndicator('loading');
+      let changed = false;
+      try {
+        const res = await fetch(`https://ntfy.sh/${syncTopic}/json?poll=1&since=all`);
+        if (res.ok) {
+          const text = await res.text();
+          const lines = text.trim().split('\n').filter(Boolean);
+          for (const line of lines) {
+            try {
+              const item = JSON.parse(line);
+              if (item.event === 'message') {
+                let payload = null;
+                if (item.attachment && item.attachment.url) {
+                  try {
+                    const aRes = await fetch(item.attachment.url);
+                    if (aRes.ok) payload = await aRes.json();
+                  } catch (e) {}
+                } else if (item.message) {
+                  try { payload = JSON.parse(item.message); } catch (e) {}
+                }
+
+                if (payload) {
+                  const didChange = await handleIncomingSyncPayload(payload);
+                  if (didChange) changed = true;
+                }
+              }
+            } catch (e) {}
+          }
+          setSyncIndicator('success');
+        }
+      } catch (e) {
+        setSyncIndicator('error');
+      }
+      return changed;
+    }
+
+    // 6. Dastlabki yuklanishda so'nggi holatni olish va birlashtirish
     async function initialPollAndSync() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlTopic = urlParams.get('topic') || urlParams.get('sync');
@@ -3556,109 +3822,56 @@
 
       connectRealtimeSSE();
 
-      const localCount = countTotalTasks(state);
-      try {
-        setSyncIndicator('loading');
-        const res = await fetch(`https://ntfy.sh/${syncTopic}/json?poll=1`);
-        if (res.ok) {
-          const text = await res.text();
-          const lines = text.trim().split('\n').filter(Boolean);
-          if (lines.length > 0) {
-            const lastItem = JSON.parse(lines[lines.length - 1]);
-            let payload = null;
-            if (lastItem && lastItem.attachment && lastItem.attachment.url) {
-              try {
-                const res = await fetch(lastItem.attachment.url);
-                payload = await res.json();
-              } catch (e) {}
-            } else if (lastItem && lastItem.message) {
-              try { payload = JSON.parse(lastItem.message); } catch (e) {}
-            }
+      // Bulutdan barcha yangilanishlarni olib, mavjud rejalar bilan yo'qotmasdan birlashtiramiz
+      await pollAndMergeCloud();
 
-            if (payload && payload.state) {
-              const remoteCount = countTotalTasks(payload.state);
-              if (remoteCount >= localCount && remoteCount > 0) {
-                state = { ...defaultState, ...payload.state };
-                ensureWeeklyRollover();
-                saveLocalOnly();
-                renderCurrentTab();
-                setSyncIndicator('success');
-                return;
-              }
-            }
-          }
-        }
-      } catch (e) {}
-
-      // Agar ushbu qurilmada vazifalar ko'p bo'lsa (masalan Laptopda 6 ta vazifa):
-      if (localCount > 0) {
-        await pushToSync();
-      }
+      // Ikkala qurilmada ham so'nggi birlashgan to'liq holat bo'lishi uchun bulutga push qilamiz
+      setTimeout(() => {
+        pushToSync();
+      }, 500);
     }
 
-    // 4. To'g'ridan-to'g'ri havoladan import (#import=...) va QR kod
-    function checkUrlHashImport() {
-      if (window.location.hash && window.location.hash.startsWith('#import=')) {
-        try {
-          const rawB64 = decodeURIComponent(window.location.hash.replace('#import=', ''));
-          const jsonStr = decodeURIComponent(escape(atob(rawB64)));
-          const parsed = JSON.parse(jsonStr);
-          if (parsed && typeof parsed === 'object') {
-            state = { ...defaultState, ...parsed };
-            saveLocalOnly();
-            renderCurrentTab();
-            window.location.hash = '';
-            alert("✅ Barcha vazifalaringiz telefoningizga muvaffaqiyatli ko'chirildi!");
-            pushToSync();
-            return true;
-          }
-        } catch (e) {}
-      }
-      return false;
+    // 7. Tugma orqali qo'lda tezkor sinxronlash
+    async function forceCloudSync() {
+      setSyncIndicator('loading');
+      showSyncToast('🔄 Bulut bilan sinxronlanmoqda...');
+      await pollAndMergeCloud();
+      await pushToSync();
+      showSyncToast("✅ Qurilmalar to'liq sinxronlandi!");
+      renderCurrentTab();
     }
 
+    // 8. Havola va QR orqali ikkinchi qurilmaga uzatish
     function getDirectShareUrl() {
-      try {
-        const jsonStr = JSON.stringify(state);
-        const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-        const encoded = encodeURIComponent(b64);
-        return `${window.location.origin}${window.location.pathname}?sync=${syncTopic}#import=${encoded}`;
-      } catch (e) {
-        return window.location.href;
-      }
+      return `${window.location.origin}${window.location.pathname}?sync=${syncTopic}`;
     }
 
     function openSyncModal() {
       const shareUrl = getDirectShareUrl();
       const qrImg = document.getElementById('syncQrImg');
       if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(shareUrl)}`;
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
       }
+      updateSyncModalUI();
       openModal('syncModal');
     }
 
     function sendToTelegram() {
       const shareUrl = getDirectShareUrl();
-      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent("RejaPro vazifalarimni telefonda ochish")}`;
+      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent("RejaPro vazifalarimni telefonda ochish va ulash")}`;
       window.open(tgUrl, '_blank');
     }
 
     function copyDirectImportLink() {
       const shareUrl = getDirectShareUrl();
       navigator.clipboard.writeText(shareUrl).then(() => {
-        alert("✅ Nusxalandi! Ushbu havolani Telegram 'Saqlangan xabarlar'ga yuborib, telefonda ustiga bosing.");
+        alert("✅ Sinxron havolasi nusxalandi! Ushbu havolani telefoningizda ochsangiz, noutbuk bilan darhol bog'lanadi.");
       }).catch(() => {
         prompt("Ushbu havolani nusxalang va telefoningizda oching:", shareUrl);
       });
     }
 
-    function forceCloudSync() {
-      pushToSync().then(() => {
-        alert("✅ Vazifalar real-time bulutga saqlandi!");
-      });
-    }
-
-    // 5. Eski saqlash kalitlaridan ma'lumotlarni avtomatik qutqarish
+    // 9. Eski kalitlardan ma'lumotlarni qutqarish
     function migrateOldData() {
       try {
         const today = getTodayString();
@@ -3669,7 +3882,7 @@
             const oldList = JSON.parse(oldRaw);
             if (Array.isArray(oldList) && oldList.length > 0) {
               const currentList = state.daily[today] || [];
-              if (currentList.length <= 3) {
+              if (currentList.length === 0) {
                 state.daily[today] = oldList;
                 saveLocalOnly();
                 renderCurrentTab();
@@ -3682,24 +3895,33 @@
       } catch (e) {}
     }
 
-    // Telefon ekrani ochilganda yoki tabga qaytilganda qayta ulanish
-    window.addEventListener('visibilitychange', () => {
+    // Telefon ekrani yoqilganda yoki tabga qaytilganda darhol yangilash
+    function onAppResume() {
       if (document.visibilityState === 'visible') {
         if (!sseClient || sseClient.readyState === EventSource.CLOSED) {
           connectRealtimeSSE();
         }
+        pollAndMergeCloud();
       }
-    });
+    }
+
+    window.addEventListener('visibilitychange', onAppResume);
+    window.addEventListener('focus', onAppResume);
+    window.addEventListener('online', onAppResume);
+
+    // Har 40 soniyada fonda tekshirib turish (aloqa uzilsa ham avtomatik ushlab qoladi)
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        pollAndMergeCloud();
+      }
+    }, 40000);
 
     // Dastur ishga tushishi
     initTheme();
     updatePomoDisplay();
     initTaskReminders();
     migrateOldData();
-    const imported = checkUrlHashImport();
-    if (!imported) {
-      initialPollAndSync();
-    }
+    initialPollAndSync();
     switchTab('daily');
   </script>
 </body>

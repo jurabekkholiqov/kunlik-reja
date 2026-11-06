@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rejapro-v13-auto-sort-completed';
+const CACHE_NAME = 'rejapro-v14-robust-sync-merger';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
